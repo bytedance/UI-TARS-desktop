@@ -64,7 +64,7 @@ export const useRunAgent = () => {
   ) => {
     const operator = settings.operator;
     if (
-      (operator === Operator.LocalBrowser || Operator.LocalComputer) &&
+      (operator === Operator.LocalBrowser || operator === Operator.LocalComputer) &&
       !(ensurePermissions?.accessibility && ensurePermissions?.screenCapture)
     ) {
       const permissionsText = [

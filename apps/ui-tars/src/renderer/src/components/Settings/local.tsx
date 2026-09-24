@@ -59,7 +59,7 @@ export const LocalSettingsDialog = ({
         </DialogHeader>
         <VLMSettings ref={vlmSettingsRef} />
         <Button className="mt-8 mx-8" onClick={handleGetStart}>
-          Get Start
+          Get Started
         </Button>
       </DialogContent>
     </Dialog>
