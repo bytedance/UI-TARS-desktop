@@ -37,6 +37,7 @@ export class XMLFormatParser implements FormatParser {
     const builder = new XMLBuilder();
     const parser = new XMLParser({
       ignoreAttributes: false,
+      parseTagValue: false,
     });
     const object = parser.parse(text);
 
