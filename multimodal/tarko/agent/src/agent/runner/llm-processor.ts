@@ -57,6 +57,7 @@ export class LLMProcessor {
     this.messageHistory = new MessageHistory(
       this.eventStream,
       this.contextAwarenessOptions?.maxImagesCount,
+      this.contextAwarenessOptions,
     );
     this.enableStreamingToolCallEvents = enableStreamingToolCallEvents;
     this.enableMetrics = enableMetrics;
@@ -188,8 +189,11 @@ export class LLMProcessor {
       this.toolProcessor.setExecutionTools(finalTools);
     }
 
+    // Update session information for compression tracking
+    this.messageHistory.updateSession(sessionId, iteration, currentModel.id, currentModel.provider);
+
     // Build messages for current iteration including enhanced system message
-    const messages = this.messageHistory.toMessageHistory(
+    const messages = await this.messageHistory.toMessageHistoryAsync(
       toolCallEngine,
       finalSystemPrompt,
       finalTools,

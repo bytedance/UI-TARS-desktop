@@ -19,6 +19,9 @@ export { getLogger, LogLevel, ConsoleLogger } from '@tarko/shared-utils';
 // Export utils
 export * from './utils';
 
+// Export context compression
+export * from './context-compression';
+
 export { resolveModel } from '@tarko/model-provider';
 export type { AgentModel } from '@tarko/model-provider';
 
