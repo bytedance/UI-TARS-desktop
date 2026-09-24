@@ -61,9 +61,15 @@ You can also use any OpenAI-compatible endpoint:
 
 ```typescript
 {
-  provider: 'custom',
-  baseURL: 'https://your-endpoint.com/v1',
-  apiKey: 'your-api-key',
-  model: 'your-model'
+  provider: 'openai-compatible',
+  baseURL: 'https://your-endpoint.example.com/v1',
+  apiKey: process.env.OPENAI_COMPAT_API_KEY,
+  model: 'your-model-id'
 }
+```
+
+The endpoint must expose the OpenAI Chat Completions API under the `/v1` prefix. Use the model ID returned by the endpoint's model catalog; do not add an `openai/` prefix. The same values can be supplied through CLI flags, for example:
+
+```bash
+npx agent-tars run --input "Explain the architecture of a retrieval-augmented agent" --model.provider openai-compatible --model.id your-model-id --model.apiKey OPENAI_COMPAT_API_KEY --model.baseURL https://your-endpoint.example.com/v1
 ```

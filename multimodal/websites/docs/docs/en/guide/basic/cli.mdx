@@ -181,6 +181,22 @@ npx agent-tars workspace --open
 
 This command will open the global workspace located at `~/.agent-tars-workspace`.
 
+## OpenAI-compatible hosted endpoints
+
+For a hosted endpoint that follows the OpenAI Chat Completions protocol, use the explicit `openai-compatible` provider. The base URL must include the provider's `/v1` API prefix, and the model ID must match the ID returned by that provider's model catalog.
+
+```bash
+npx agent-tars run \
+  --input "Explain the architecture of a retrieval-augmented agent" \
+  --model.provider openai-compatible \
+  --model.id your-model-id \
+  --model.apiKey OPENAI_COMPAT_API_KEY \
+  --model.baseURL https://your-endpoint.example.com/v1
+```
+
+- Do not append `/chat/completions` to `--model.baseURL`.
+- Do not prefix the model ID with `openai/`; that prefix is only used by providers such as OpenRouter or LiteLLM.
+- API key and base URL values can reference environment variables, as shown above.
 ## Configuration files
 
 Agent TARS automatically looks for these configuration files in the current directory:
