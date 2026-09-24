@@ -4,12 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import imagemin from 'imagemin';
-import imageminPngquant from 'imagemin-pngquant';
-// @ts-expect-error
-import imageminMozjpeg from 'imagemin-mozjpeg';
-// @ts-expect-error
-import imageminWebp from 'imagemin-webp';
+// Use dynamic imports for ESM-only packages to ensure CJS compatibility
+async function loadImagemin() {
+  return (await import('imagemin')).default;
+}
+async function loadPngquant() {
+  return (await import('imagemin-pngquant')).default;
+}
+async function loadMozjpeg() {
+  return (await import('imagemin-mozjpeg')).default;
+}
+async function loadWebp() {
+  return (await import('imagemin-webp')).default;
+}
 
 export interface ImageCompressionOptions {
   quality: number; // Compression quality (1-100)
@@ -48,8 +55,9 @@ export class ImageCompressor {
    * @param imageBuffer Image Buffer
    */
   async compressToBuffer(imageBuffer: Buffer): Promise<Buffer> {
+    const imagemin = await loadImagemin();
     // Choose appropriate compression plugin
-    const plugins = this.getPluginsForFormat();
+    const plugins = await this.getPluginsForFormat();
 
     // Compress image
     return await imagemin.buffer(imageBuffer, {
@@ -60,22 +68,30 @@ export class ImageCompressor {
   /**
    * Select plugins based on target format
    */
-  private getPluginsForFormat() {
+  private async getPluginsForFormat() {
     const quality = this.options.quality / 100; // Convert to 0-1 range (required by some plugins)
 
     switch (this.options.format) {
-      case 'jpeg':
+      case 'jpeg': {
+        const imageminMozjpeg = await loadMozjpeg();
         return [imageminMozjpeg({ quality: this.options.quality })];
-      case 'png':
+      }
+      case 'png': {
+        const imageminPngquant = await loadPngquant();
         return [
           imageminPngquant({
             quality: [quality, Math.min(quality + 0.2, 1)],
           }),
         ];
-      case 'webp':
+      }
+      case 'webp': {
+        const imageminWebp = await loadWebp();
         return [imageminWebp({ quality: this.options.quality })];
-      default:
-        return [imageminWebp({ quality: this.options.quality })];
+      }
+      default: {
+        const imageminWebpDefault = await loadWebp();
+        return [imageminWebpDefault({ quality: this.options.quality })];
+      }
     }
   }
 
