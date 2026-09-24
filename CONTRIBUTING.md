@@ -61,13 +61,26 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 │           ├── preload
 │           └── renderer
 │ 
+├── docs
+├── examples
+├── multimodal
+│   ├── agent-tars
+│   ├── benchmark
+│   ├── gui-agent
+│   ├── omni-tars
+│   ├── tarko
+│   └── websites
 ├── packages
 │   ├── agent-infra
 │   │   ├── browser
 │   │   ├── browser-use
+│   │   ├── create-new-mcp
 │   │   ├── logger
+│   │   ├── mcp-benchmark
 │   │   ├── mcp-client
+│   │   ├── mcp-http-server
 │   │   ├── mcp-servers
+│   │   ├── mcp-shared
 │   │   ├── search
 │   │   └── shared
 │   ├── common
@@ -86,7 +99,7 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 └── vitest.*.mts            # Unit test configuration
 ```
 
-> **Note**: The `src` directory is located in the top-level directory instead of the `apps/{main,preload,renderer}` directories because Electron Forge previously did not support Pnpm's hoisting mechanism([electron/forge#2633](https://github.com/electron/forge/issues/2633)), requiring the `src` directory to be placed in the top-level directory.
+> **Note**: The desktop app's `src` directory lives in `apps/ui-tars/src` and holds the `main`, `preload` and `renderer` sources. It used to be placed in the repository's top-level directory because Electron Forge did not support Pnpm's hoisting mechanism ([electron/forge#2633](https://github.com/electron/forge/issues/2633)); that layout no longer exists, so there is no top-level `src/` to add files to.
 
 
 #### Clone the repository
