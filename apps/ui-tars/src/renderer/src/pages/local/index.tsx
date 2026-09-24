@@ -138,7 +138,7 @@ const LocalOperator = () => {
     status === StatusEnum.PAUSE;
 
   const onNewChat = useCallback(async () => {
-    const session = await createSession('New Session', {
+    const session = await createSession('新建会话', {
       operator: state.operator,
     });
 
@@ -261,7 +261,7 @@ const LocalOperator = () => {
             );
           })}
 
-          {thinking && <LoadingText text={'Thinking...'} />}
+          {thinking && <LoadingText text={'思考中...'} />}
           {errorMsg && <ErrorMessage text={errorMsg} />}
         </div>
       </ScrollArea>
@@ -284,7 +284,7 @@ const LocalOperator = () => {
             ></SidebarTrigger>
             <Button variant="outline" size="sm" onClick={handleNewChat}>
               <MessageCirclePlus />
-              New Chat
+              新建会话
             </Button>
           </div>
           {renderChatList()}
@@ -298,7 +298,7 @@ const LocalOperator = () => {
         <Card className="flex-1 basis-3/5 p-3 h-[calc(100vh-76px)]">
           <Tabs defaultValue="screenshot" className="flex-1">
             <TabsList>
-              <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
+              <TabsTrigger value="screenshot">屏幕截图</TabsTrigger>
             </TabsList>
             <TabsContent value="screenshot">
               <ImageGallery

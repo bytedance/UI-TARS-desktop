@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { RemoteResourceStatus } from '@renderer/hooks/useRemoteResource';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 interface StatusIndicatorProps {
   name: string;
@@ -10,52 +11,50 @@ interface StatusIndicatorProps {
 const statusConfig = {
   init: {
     icon: '🚀',
-    title: 'Initializing',
-    description: 'Preparing Cloud {name} connection...',
+    titleKey: 'remote_status.init.title',
+    descriptionKey: 'remote_status.init.desc',
     bgColor: 'bg-blue-50',
     textColor: 'text-blue-600',
   },
   unavailable: {
     icon: '📁',
-    title: 'Unavailable',
-    description: 'This resource is from history and no longer available',
+    titleKey: 'remote_status.unavailable.title',
+    descriptionKey: 'remote_status.unavailable.desc',
     bgColor: 'bg-gray-100',
     textColor: 'text-gray-600',
   },
   queuing: {
     icon: '⏳',
-    title: 'Queuing',
-    description: 'Waiting in queue to establish connection',
+    titleKey: 'remote_status.queuing.title',
+    descriptionKey: 'remote_status.queuing.desc',
     bgColor: 'bg-blue-50',
     textColor: 'text-blue-600',
   },
   connecting: {
     icon: '🔄',
-    title: 'Connecting',
-    description: 'Establishing Cloud {name} connection...',
+    titleKey: 'remote_status.connecting.title',
+    descriptionKey: 'remote_status.connecting.desc',
     bgColor: 'bg-yellow-50',
     textColor: 'text-yellow-600',
   },
   connected: {
     icon: '✅',
-    title: 'Connected',
-    description: 'Cloud {name} connection established successfully',
+    titleKey: 'remote_status.connected.title',
+    descriptionKey: 'remote_status.connected.desc',
     bgColor: 'bg-green-50',
     textColor: 'text-green-600',
   },
   expired: {
     icon: '⏰',
-    title: 'Session Expired',
-    description:
-      'The Cloud {name} session has expired. Please create a new chat.',
+    titleKey: 'remote_status.expired.title',
+    descriptionKey: 'remote_status.expired.desc',
     bgColor: 'bg-orange-50',
     textColor: 'text-orange-600',
   },
   error: {
     icon: '❌',
-    title: 'Connection Error',
-    description:
-      'Failed to establish Cloud {name} connection. Please try again.',
+    titleKey: 'remote_status.error.title',
+    descriptionKey: 'remote_status.error.desc',
     bgColor: 'bg-red-50',
     textColor: 'text-red-600',
   },
@@ -63,9 +62,11 @@ const statusConfig = {
 
 export const StatusIndicator = memo<StatusIndicatorProps>(
   ({ name, status, queueNum }) => {
+    const { t } = useTranslation();
     const config = statusConfig[status];
 
-    const description = config.description.replace('{name}', name);
+    const title = t(config.titleKey);
+    const description = t(config.descriptionKey).replace('{name}', name);
 
     const renderQueueInfo = () => {
       if (status === 'queuing' && queueNum !== null && queueNum !== undefined) {
@@ -73,7 +74,10 @@ export const StatusIndicator = memo<StatusIndicatorProps>(
           <div
             className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${config.textColor} bg-white/50`}
           >
-            Position in queue: #{queueNum}
+            {t('remote_status.queue_position').replace(
+              '{queueNum}',
+              String(queueNum),
+            )}
           </div>
         );
       }
@@ -97,12 +101,12 @@ export const StatusIndicator = memo<StatusIndicatorProps>(
       <div
         className={`flex flex-col items-center justify-center w-full h-full ${config.bgColor} border-2 border-dashed border-gray-300 rounded-lg`}
       >
-        <div className="text-4xl mb-4" role="img" aria-label={config.title}>
+        <div className="text-4xl mb-4" role="img" aria-label={title}>
           {config.icon}
         </div>
 
         <h3 className={`text-xl font-semibold mb-2 ${config.textColor}`}>
-          {config.title}
+          {title}
         </h3>
 
         <p className={`text-sm text-center ${config.textColor} opacity-80`}>

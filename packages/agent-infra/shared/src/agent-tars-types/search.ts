@@ -50,6 +50,6 @@ export interface SearchSettings {
     needVisitedUrls?: boolean;
     // #endregion
   };
-  apiKey: string;
+  apiKey: string; // @secretlint-disable-line
   baseUrl?: string;
 }

@@ -19,6 +19,7 @@ import { BrowserWindow } from 'electron';
 
 export const DEFAULT_SETTING: LocalStore = {
   language: 'en',
+  uiLanguage: 'en',
   vlmProvider: (env.vlmProvider as VLMProviderV2) || '',
   vlmBaseUrl: env.vlmBaseUrl || '',
   vlmApiKey: env.vlmApiKey || '',

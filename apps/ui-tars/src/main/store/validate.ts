@@ -24,6 +24,7 @@ export const PresetSchema = z.object({
   // Chat Settings
   operator: z.nativeEnum(Operator),
   language: z.enum(['zh', 'en']).optional(),
+  uiLanguage: z.enum(['zh', 'en']).optional(),
   screenshotScale: z.number().min(0.1).max(1).optional(),
   maxLoopCount: z.number().min(25).max(200).optional(),
   loopIntervalInMs: z.number().min(0).max(3000).optional(),

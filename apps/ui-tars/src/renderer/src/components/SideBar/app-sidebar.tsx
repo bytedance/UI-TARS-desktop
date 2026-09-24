@@ -27,6 +27,7 @@ import { useStore } from '../../hooks/useStore';
 import { StatusEnum } from '@ui-tars/sdk';
 import { NavDialog } from '../AlertDialog/navDialog';
 import { api } from '../../api';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const {
@@ -40,6 +41,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const location = useLocation();
   const { openSettings } = useGlobalSettings();
   const { status } = useStore();
+  const { t } = useTranslation();
   const [isNavDialogOpen, setNavDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
     'home' | { type: 'session'; id: string } | null
@@ -150,7 +152,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
               onClick={handleHomeClick}
             >
               <Home />
-              Home
+              {t('sidebar.home')}
             </SidebarMenuButton>
           </SidebarMenu>
         </SidebarHeader>
