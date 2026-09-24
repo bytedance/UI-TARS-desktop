@@ -227,8 +227,10 @@ class ScreenMarker {
           paintWhenInitiallyHidden: true,
           type: 'panel',
           webPreferences: { nodeIntegration: true, contextIsolation: false },
-          ...(overlay.xPos &&
-            overlay.yPos && {
+          ...(overlay.xPos !== undefined &&
+            overlay.yPos !== undefined &&
+            Number.isFinite(overlay.xPos) &&
+            Number.isFinite(overlay.yPos) && {
               // logical pixels
               x: (overlay.xPos + overlay.offsetX) * scaleFactor,
               y: (overlay.yPos + overlay.offsetY) * scaleFactor,
@@ -253,7 +255,12 @@ class ScreenMarker {
         //   });
         // }
 
-        if (overlay.xPos && overlay.yPos) {
+        if (
+          overlay.xPos !== undefined &&
+          overlay.yPos !== undefined &&
+          Number.isFinite(overlay.xPos) &&
+          Number.isFinite(overlay.yPos)
+        ) {
           this.lastShowPredictionMarkerPos = {
             xPos: overlay.xPos,
             yPos: overlay.yPos,

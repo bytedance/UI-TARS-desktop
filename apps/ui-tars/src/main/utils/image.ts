@@ -26,7 +26,12 @@ export async function markClickPosition(data: {
     });
     const imageOverlays: sharp.OverlayOptions[] = overlays
       .map((o) => {
-        if (o.yPos && o.xPos) {
+        if (
+          o.yPos !== undefined &&
+          o.xPos !== undefined &&
+          Number.isFinite(o.yPos) &&
+          Number.isFinite(o.xPos)
+        ) {
           return {
             input: Buffer.from(o.svg),
             top: o.yPos + o.offsetY,

@@ -208,8 +208,14 @@ export class BrowserOperator extends Operator {
       screenWidth,
       screenHeight,
     });
-    const startX = coords.x ? coords.x / deviceScaleFactor : null;
-    const startY = coords.y ? coords.y / deviceScaleFactor : null;
+    const startX =
+      coords.x !== null && Number.isFinite(coords.x)
+        ? coords.x / deviceScaleFactor
+        : null;
+    const startY =
+      coords.y !== null && Number.isFinite(coords.y)
+        ? coords.y / deviceScaleFactor
+        : null;
 
     this.logger.info(`Parsed coordinates: (${startX}, ${startY})`);
     this.logger.info(`Executing action: ${action_type}`);
@@ -240,18 +246,21 @@ export class BrowserOperator extends Operator {
         case 'click':
         case 'left_click':
         case 'left_single':
-          if (startX && startY) await this.handleClick(startX, startY);
+          if (startX !== null && startY !== null)
+            await this.handleClick(startX, startY);
           else throw new Error(`Missing startX(${startX}) or startY${startX}.`);
           break;
 
         case 'double_click':
         case 'left_double':
-          if (startX && startY) await this.handleDoubleClick(startX, startY);
+          if (startX !== null && startY !== null)
+            await this.handleDoubleClick(startX, startY);
           else throw new Error(`Missing startX(${startX}) or startY${startX}.`);
           break;
 
         case 'right_click':
-          if (startX && startY) await this.handleRightClick(startX, startY);
+          if (startX !== null && startY !== null)
+            await this.handleRightClick(startX, startY);
           else throw new Error(`Missing startX(${startX}) or startY${startX}.`);
           break;
 
@@ -597,12 +606,24 @@ export class BrowserOperator extends Operator {
     });
 
     // Adjust for device scale factor
-    const startX = startCoords.x ? startCoords.x / deviceScaleFactor : null;
-    const startY = startCoords.y ? startCoords.y / deviceScaleFactor : null;
-    const endX = endCoords.x ? endCoords.x / deviceScaleFactor : null;
-    const endY = endCoords.y ? endCoords.y / deviceScaleFactor : null;
+    const startX =
+      startCoords.x !== null && Number.isFinite(startCoords.x)
+        ? startCoords.x / deviceScaleFactor
+        : null;
+    const startY =
+      startCoords.y !== null && Number.isFinite(startCoords.y)
+        ? startCoords.y / deviceScaleFactor
+        : null;
+    const endX =
+      endCoords.x !== null && Number.isFinite(endCoords.x)
+        ? endCoords.x / deviceScaleFactor
+        : null;
+    const endY =
+      endCoords.y !== null && Number.isFinite(endCoords.y)
+        ? endCoords.y / deviceScaleFactor
+        : null;
 
-    if (!startX || !startY || !endX || !endY) {
+    if (startX === null || startY === null || endX === null || endY === null) {
       throw new Error('Invalid coordinates for drag operation');
     }
 
