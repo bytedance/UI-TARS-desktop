@@ -125,7 +125,7 @@ interface AgentOptions {
   instructions?: string;           // System prompt
   tools?: Tool[];                 // Available tools
   model?: ModelConfig;            // LLM configuration
-  maxIterations?: number;         // Max reasoning loops (default: 10)
+  maxIterations?: number;         // Max reasoning loops (default: 1000)
   maxTokens?: number;            // Token limit per request
   temperature?: number;          // LLM temperature (default: 0.7)
   logLevel?: LogLevel;           // Logging verbosity
