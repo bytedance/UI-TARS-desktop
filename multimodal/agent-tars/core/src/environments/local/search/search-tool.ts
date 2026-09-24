@@ -80,6 +80,7 @@ export class SearchToolProvider {
       tavily: SearchProvider.Tavily,
       searxng: SearchProvider.SearXNG,
       duckduckgo: SearchProvider.DuckduckgoSearch,
+      firecrawl: SearchProvider.Firecrawl,
     };
 
     const resolvedProvider = providerMap[provider] || SearchProvider.BrowserSearch;

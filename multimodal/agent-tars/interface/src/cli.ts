@@ -17,7 +17,7 @@ import { AgentTARSAppConfig } from './config';
  */
 export type AgentTARSCLIArguments = Pick<
   AgentTARSAppConfig,
-  'workspace' | 'browser' | 'planner' | 'search' | 'agio'
+  'workspace' | 'browser' | 'planner' | 'search' | 'fetch' | 'agio'
 > &
   AgentCLIArguments & {
     // Deprecated shortcut options for backward compatibility

@@ -16,6 +16,7 @@ import { ResourceCleaner } from '../../utils';
 import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { SearchToolProvider } from './search';
+import { FetchToolProvider } from './fetch';
 import { FilesystemToolsManager } from './filesystem';
 import { WorkspacePathResolver } from '../../shared/workspace-path-resolver';
 import { AgentTARSBaseEnvironment } from '../base';
@@ -42,6 +43,7 @@ export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
   private browserToolsManager?: BrowserToolsManager;
   private filesystemToolsManager?: FilesystemToolsManager;
   private searchToolProvider?: SearchToolProvider;
+  private fetchToolProvider?: FetchToolProvider;
   private browserGUIAgent?: BrowserGUIAgent;
   private mcpServers: BuiltInMCPServers = {};
   private mcpClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
@@ -86,6 +88,11 @@ export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
     // Initialize search tools
     if (this.options.search) {
       await this.initializeSearchTools(registerToolFn);
+    }
+
+    // Initialize fetch tool (independent of search)
+    if (this.options.fetch) {
+      await this.initializeFetchTools(registerToolFn);
     }
 
     // Initialize MCP servers if using in-memory implementation
@@ -135,6 +142,25 @@ export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
     registerToolFn(searchTool);
 
     this.logger.info('✅ Search tools initialized successfully');
+  }
+
+  /**
+   * Initialize the fetch tool (`web_fetch`).
+   *
+   * Standalone capability — reads any URL to clean markdown via Firecrawl's
+   * scrape API. Independent of the search provider; configured via
+   * `options.fetch`.
+   */
+  private async initializeFetchTools(registerToolFn: (tool: Tool) => void): Promise<void> {
+    this.logger.info('📄 Initializing fetch tool');
+
+    this.fetchToolProvider = new FetchToolProvider(this.logger, {
+      apiKey: this.options.fetch!.apiKey,
+      baseUrl: this.options.fetch!.baseUrl,
+    });
+    registerToolFn(this.fetchToolProvider.createFetchTool());
+
+    this.logger.info('✅ Fetch tool (web_fetch) initialized successfully');
   }
 
   /**

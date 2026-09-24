@@ -22,6 +22,11 @@ import {
 import { Logger, defaultLogger } from '@agent-infra/logger';
 import { TavilySearchConfig, TavilySearchOptions, tavily } from './tavily';
 import { SearXNGSearchConfig, SearXNGSearchOptions, searxng } from './searxng';
+import {
+  FirecrawlSearchConfig,
+  FirecrawlSearchOptions,
+  firecrawl,
+} from './firecrawl';
 
 export { SearchProvider };
 export interface SearchProviderConfigMap {
@@ -30,6 +35,7 @@ export interface SearchProviderConfigMap {
   [SearchProvider.Tavily]: TavilySearchConfig;
   [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchClientConfig;
   [SearchProvider.SearXNG]: SearXNGSearchConfig;
+  [SearchProvider.Firecrawl]: FirecrawlSearchConfig;
 }
 
 export type SearchProviderConfig<T> = T extends SearchProvider
@@ -42,6 +48,7 @@ export interface SearchProviderSearchOptionsMap {
   [SearchProvider.Tavily]: TavilySearchOptions;
   [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchOptions;
   [SearchProvider.SearXNG]: SearXNGSearchOptions;
+  [SearchProvider.Firecrawl]: FirecrawlSearchOptions;
 }
 
 export type SearchProviderSearchOptions<T> = T extends SearchProvider
@@ -140,7 +147,7 @@ export class SearchClient<T extends SearchProvider> {
           ...(this.config.providerConfig as BrowserSearchConfig),
         });
         const searchOptions: BrowserSearchOptions = {
-          ...((originalOptions as BrowserSearchOptions) || {}),
+          ...((originalOptions as unknown as BrowserSearchOptions) || {}),
           query: options.query,
           count: options.count,
         };
@@ -199,7 +206,7 @@ export class SearchClient<T extends SearchProvider> {
         );
         const searchOptions: SearXNGSearchOptions = {
           count: options.count,
-          ...((originalOptions as SearXNGSearchOptions) || {}),
+          ...((originalOptions as unknown as SearXNGSearchOptions) || {}),
           query: options.query,
         };
 
@@ -218,7 +225,7 @@ export class SearchClient<T extends SearchProvider> {
           this.config.providerConfig as DuckDuckGoSearchClientConfig,
         );
         const searchOptions: DuckDuckGoSearchOptions = {
-          ...((originalOptions as DuckDuckGoSearchOptions) || {}),
+          ...((originalOptions as unknown as DuckDuckGoSearchOptions) || {}),
         };
 
         const response = await client.search({
@@ -239,6 +246,57 @@ export class SearchClient<T extends SearchProvider> {
         };
       }
 
+      case SearchProvider.Firecrawl: {
+        const client = firecrawl(
+          this.config.providerConfig as FirecrawlSearchConfig,
+        );
+        const firecrawlOptions =
+          (originalOptions as FirecrawlSearchOptions) || {};
+
+        const response = await client.search(options.query, {
+          limit: options.count,
+          ...firecrawlOptions,
+        });
+
+        // Firecrawl groups results by source type (web/news/images). Flatten
+        // web + news into the unified page list. When `scrapeOptions` was set,
+        // each result is a scraped `Document` carrying full-page `markdown` and
+        // its URL under `metadata.sourceURL` (no top-level `url`); plain results
+        // carry a top-level `url` + `description`. Read both shapes, then drop
+        // any item we couldn't resolve a URL for.
+        type FirecrawlItem = {
+          url?: string;
+          title?: string;
+          description?: string;
+          snippet?: string;
+          markdown?: string;
+          metadata?: { sourceURL?: string; title?: string };
+        };
+        const web = (response.web ?? []) as FirecrawlItem[];
+        const news = (response.news ?? []) as FirecrawlItem[];
+
+        const isResolved = (page: {
+          title: string;
+          url?: string;
+          content: string;
+        }): page is PageResult => !!page.url;
+
+        return {
+          pages: [
+            ...web.map((item) => ({
+              title: item.title || item.metadata?.title || '',
+              url: item.url || item.metadata?.sourceURL,
+              content: item.markdown || item.description || '',
+            })),
+            ...news.map((item) => ({
+              title: item.title || item.metadata?.title || '',
+              url: item.url || item.metadata?.sourceURL,
+              content: item.snippet || item.description || '',
+            })),
+          ].filter(isResolved),
+        };
+      }
+
       default:
         throw new Error(`Unsupported search provider: ${this.config.provider}`);
     }
@@ -246,3 +304,4 @@ export class SearchClient<T extends SearchProvider> {
 }
 
 export * from './tavily';
+export * from './firecrawl';
