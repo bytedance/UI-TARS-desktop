@@ -5,6 +5,7 @@
 
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { isExternallyReachableHost } from '@tarko/shared-utils';
 
 /**
@@ -105,13 +106,7 @@ function matchesToken(expected: Buffer, presented: string): boolean {
   return timingSafeEqual(presentedBuffer, expected);
 }
 
-/**
- * Whether a request carries the access token.
- *
- * Separate from the middleware so the workspace static server can ask the same
- * question inline, instead of a second catch-all mount sitting in front of it.
- */
-export function createRequestAuthorizer(token: string) {
+function createRequestAuthorizer(token: string) {
   const expected = Buffer.from(token);
 
   return (req: Request): boolean => {
@@ -119,12 +114,6 @@ export function createRequestAuthorizer(token: string) {
     return presented !== undefined && matchesToken(expected, presented);
   };
 }
-
-export const UNAUTHENTICATED_RESPONSE = {
-  error: 'Authentication required',
-  message:
-    'This server requires an access token because it is reachable beyond this machine. Send it as `Authorization: Bearer <token>` or a `token` query parameter.',
-};
 
 export function createNetworkAuthMiddleware(token: string) {
   const isAuthorized = createRequestAuthorizer(token);
@@ -144,6 +133,74 @@ export function createNetworkAuthMiddleware(token: string) {
       return;
     }
 
-    res.status(401).json(UNAUTHENTICATED_RESPONSE);
+    res.status(401).json({
+      error: 'Authentication required',
+      message:
+        'This server requires an access token because it is reachable beyond this machine. Send it as `Authorization: Bearer <token>` or a `token` query parameter.',
+    });
+  };
+}
+
+/**
+ * Throttles repeated credential failures.
+ *
+ * Bounds how fast a caller can work through guesses; paired with the minimum
+ * length above, an attacker gets neither a short secret nor a fast way to
+ * search for it.
+ *
+ * A request carrying the right token is skipped outright, so a caller who
+ * exhausts the limit locks out nobody but themselves. Without that, anyone able
+ * to reach the port could keep the operator out by failing on purpose,
+ * especially behind a proxy where everyone shares one address.
+ */
+export function createAuthRateLimiter(token: string, isCounted?: (requestPath: string) => boolean) {
+  const countsTowardsLimit = createFailedAttemptPredicate(token, isCounted);
+
+  return rateLimit({
+    windowMs: 60_000,
+    limit: 30,
+    skipSuccessfulRequests: true,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    skip: (req: Request) => !countsTowardsLimit(req),
+    message: {
+      error: 'Too many failed authentication attempts',
+      message: 'Wait a minute before trying again.',
+    },
+  });
+}
+
+/**
+ * Which requests count towards the limit above: a guess at the token, on a path
+ * that needs one.
+ */
+export function createFailedAttemptPredicate(
+  token: string,
+  isCounted?: (requestPath: string) => boolean,
+) {
+  const isAuthorized = createRequestAuthorizer(token);
+
+  return (req: Request): boolean =>
+    !isAuthorized(req) && (isCounted === undefined || isCounted(req.path));
+}
+
+/**
+ * Narrows an auth middleware to the requests `isProtected` claims.
+ *
+ * A catch-all mount covers two different things: workspace files, which carry
+ * session data and need the token, and everything falling through to the web UI
+ * shell, which has to stay loadable so the page can present one.
+ */
+export function createScopedAuthMiddleware(
+  authMiddleware: (req: Request, res: Response, next: NextFunction) => void,
+  isProtected: (requestPath: string) => boolean,
+) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!isProtected(req.path)) {
+      next();
+      return;
+    }
+
+    authMiddleware(req, res, next);
   };
 }

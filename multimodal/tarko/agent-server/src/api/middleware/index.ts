@@ -8,8 +8,10 @@ export { exclusiveModeMiddleware } from './exclusive-mode';
 export { csrfProtectionMiddleware, generateCsrfToken } from './csrf-protection';
 export { createHostValidationMiddleware, isAllowedHostHeader } from './host-validation';
 export {
+  createAuthRateLimiter,
+  createFailedAttemptPredicate,
   createNetworkAuthMiddleware,
-  createRequestAuthorizer,
+  createScopedAuthMiddleware,
   resolveServerAuth,
 } from './network-auth';
 export type {

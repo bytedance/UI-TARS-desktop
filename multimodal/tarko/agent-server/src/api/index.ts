@@ -1,10 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import { registerAllRoutes } from './routes';
-import { setupWorkspaceStaticServer } from '../utils/workspace-static-server';
+import {
+  isWorkspaceFileRequest,
+  setupWorkspaceStaticServer,
+} from '../utils/workspace-static-server';
 import { csrfProtectionMiddleware } from './middleware/csrf-protection';
 import { createHostValidationMiddleware } from './middleware/host-validation';
-import { createNetworkAuthMiddleware, createRequestAuthorizer } from './middleware/network-auth';
+import {
+  createAuthRateLimiter,
+  createNetworkAuthMiddleware,
+  createScopedAuthMiddleware,
+} from './middleware/network-auth';
 import { registerCsrfRoutes } from './routes/csrf';
 
 /**
@@ -119,11 +126,10 @@ export function setupAPI(
   // Guards the whole API, the CSRF token endpoint included: that token defends
   // against cross-site requests, it does not identify a caller. Scoped to /api
   // so the web UI shell still loads and can then present the token itself.
-  const authMiddleware = options?.authToken
-    ? createNetworkAuthMiddleware(options.authToken)
-    : undefined;
-  if (authMiddleware) {
-    app.use('/api', authMiddleware);
+  const authToken = options?.authToken;
+  const authMiddleware = authToken ? createNetworkAuthMiddleware(authToken) : undefined;
+  if (authToken && authMiddleware) {
+    app.use('/api', createAuthRateLimiter(authToken), authMiddleware);
   }
 
   // Register CSRF token endpoint (before CSRF protection so GET is accessible)
@@ -150,11 +156,17 @@ export function setupAPI(
 
   // Setup workspace static server (lower priority, after API routes)
   if (options?.workspacePath) {
-    setupWorkspaceStaticServer(
-      app,
-      options.workspacePath,
-      options.isDebug,
-      options.authToken ? createRequestAuthorizer(options.authToken) : undefined,
-    );
+    // Workspace files are session data and need the token too, but only those:
+    // everything else here falls through to the web UI shell, which has to stay
+    // loadable so the page can present a token in the first place.
+    if (authToken && authMiddleware) {
+      app.use(
+        '/',
+        createAuthRateLimiter(authToken, isWorkspaceFileRequest),
+        createScopedAuthMiddleware(authMiddleware, isWorkspaceFileRequest),
+      );
+    }
+
+    setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug);
   }
 }

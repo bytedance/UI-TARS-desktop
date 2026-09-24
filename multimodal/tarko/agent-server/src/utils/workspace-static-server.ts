@@ -7,7 +7,6 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { UNAUTHENTICATED_RESPONSE } from '../api/middleware/network-auth';
 
 /**
  * Extract session ID from referer URL
@@ -261,7 +260,6 @@ export function setupWorkspaceStaticServer(
   app: express.Application,
   workspacePath: string,
   isDebug = false,
-  isAuthorized?: (req: express.Request) => boolean,
 ): void {
   if (!workspacePath || !fs.existsSync(workspacePath)) {
     if (isDebug) {
@@ -281,13 +279,6 @@ export function setupWorkspaceStaticServer(
   app.use('/', (req, res, next) => {
     if (!isWorkspaceFileRequest(req.path)) {
       return next();
-    }
-
-    // Workspace files are session data, so they need the same token the API
-    // does. Checked here rather than in a mount in front, because only this
-    // handler knows which requests it will answer.
-    if (isAuthorized && !isAuthorized(req)) {
-      return res.status(401).json(UNAUTHENTICATED_RESPONSE);
     }
 
     // Try to extract session ID from query params or headers
