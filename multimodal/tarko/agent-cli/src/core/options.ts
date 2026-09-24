@@ -5,6 +5,7 @@
 
 import { Command } from 'cac';
 import { AgentCLIArguments, AgentImplementation } from '@tarko/interface';
+import { DEFAULT_SERVER_HOST } from '@tarko/shared-utils';
 import { AgioProvider } from '../agio/AgioProvider';
 
 export type { AgentCLIArguments };
@@ -17,6 +18,15 @@ export const DEFAULT_PORT = 8888;
 export function addCommonOptions(command: Command): Command {
   const baseCommand = command
     .option('--port <port>', 'Port to run the server on', { default: DEFAULT_PORT })
+    .option(
+      '--host <host>',
+      `Network interface to bind (default: ${DEFAULT_SERVER_HOST})
+
+                            The server exposes agent execution without authentication, so it binds
+                            loopback only by default. Pass --host 0.0.0.0 to listen on every
+                            interface, and only do so behind a proxy that authenticates requests.
+      `,
+    )
     .option('--open', 'Open the web UI in the default browser on server start')
     .option(
       '--config, -c <path>',

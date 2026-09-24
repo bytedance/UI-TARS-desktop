@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { deepMerge, isTest } from '@tarko/shared-utils';
+import { deepMerge, isTest, resolveServerHost } from '@tarko/shared-utils';
 import { getStaticPath } from '@tarko/agent-ui-builder';
 import {
   CommonFilterOptions,
@@ -64,6 +64,7 @@ export function buildAppConfig<
     debug,
     quiet,
     port,
+    host,
     stream,
     headless,
     input,
@@ -119,7 +120,7 @@ export function buildAppConfig<
 
   // Apply CLI shortcuts
   applyLoggingShortcuts(config, { debug, quiet });
-  applyServerConfiguration(config, { port });
+  applyServerConfiguration(config, { port, host });
 
   // Apply WebUI defaults
   applyWebUIDefaults(config as AgentAppConfig);
@@ -243,7 +244,10 @@ function parseLogLevel(level: string): LogLevel | undefined {
 /**
  * Apply server configuration with defaults
  */
-function applyServerConfiguration(config: AgentAppConfig, serverOptions: { port?: number }): void {
+function applyServerConfiguration(
+  config: AgentAppConfig,
+  serverOptions: { port?: number; host?: string },
+): void {
   if (!config.server) {
     config.server = {
       port: 8888,
@@ -259,6 +263,12 @@ function applyServerConfiguration(config: AgentAppConfig, serverOptions: { port?
   if (serverOptions.port) {
     config.server.port = serverOptions.port;
   }
+
+  if (serverOptions.host) {
+    config.server.host = serverOptions.host;
+  }
+
+  config.server.host = resolveServerHost(config.server.host);
 }
 
 /**
