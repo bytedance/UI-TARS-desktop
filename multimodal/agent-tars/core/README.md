@@ -288,4 +288,4 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for development guidelines.
 
 ## License
 
-Apache-2.0 - See [LICENSE](../../LICENSE) for details.
+Apache-2.0 - See [LICENSE](https://github.com/bytedance/UI-TARS-desktop/blob/main/LICENSE) for details.
