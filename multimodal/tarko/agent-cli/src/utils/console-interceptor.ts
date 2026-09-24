@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { format } from 'util';
+
 interface ConsoleInterceptorOptions {
   silent?: boolean;
   capture?: boolean;
@@ -83,9 +85,9 @@ export class ConsoleInterceptor {
     stream: NodeJS.WriteStream = process.stdout,
   ): (...args: any[]) => void {
     return (...args: any[]): void => {
-      const message = args
-        .map((arg) => (typeof arg === 'string' ? arg : JSON.stringify(arg)))
-        .join(' ');
+      // `util.format` is what Node's own console uses, so the buffer holds the exact text that
+      // was suppressed: JSON.stringify renders an Error as `{}` and throws on circular input.
+      const message = format(...args);
 
       if (this.options.filter && !this.options.filter(message)) {
         original.apply(console, args);
