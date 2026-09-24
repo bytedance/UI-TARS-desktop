@@ -25,7 +25,7 @@
     "coverage": "vitest run --coverage",
     "build:e2e": "npm run build:dist && cross-env CI=e2e npm run package",
     "test:e2e": "playwright test",
-    "build:deps": "pnpm --filter \"!ui-tars-desktop,ui-tars-desktop...\" build && cd packages/visualizer && pnpm install --ignore-workspace",
+    "build:deps": "pnpm --filter \"!ui-tars-desktop\" --filter \"!ui-tars-desktop...\" build && cd packages/visualizer && pnpm install --ignore-workspace",
     "build:dist": "cross-env NODE_ENV=production electron-vite build",
     "build": "npm run clean && npm run typecheck && cross-env NODE_ENV=production electron-vite build && electron-forge make --enable-logging",
     "make": "electron-forge make",
