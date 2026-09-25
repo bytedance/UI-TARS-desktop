@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/interface';
+import { AgentEventStream, AgentStatus } from '@tarko/interface';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AgentSession as LegacyAgentSession } from '../../src/core/AgentSession';
 import { AgentSession as NextAgentSession } from '../../../agent-server-next/src/services/session/AgentSession';
@@ -22,6 +22,7 @@ type SystemEventData = Omit<AgentEventStream.SystemEvent, 'id' | 'type' | 'times
 type TestSession = {
   agent: {
     run: (...args: unknown[]) => Promise<unknown>;
+    status: () => AgentStatus;
     getEventStream: () => {
       createEvent: (type: 'system', data: SystemEventData) => AgentEventStream.SystemEvent;
     };
@@ -93,6 +94,7 @@ describe.each(implementations)('%s exclusive streaming lifecycle', (_, Session) 
     const session = new Session(server, sessionId);
     const eventStream = createEventStream();
     session.agent = {
+      status: () => AgentStatus.IDLE,
       run: vi.fn().mockRejectedValue(new Error('startup failed')),
       getEventStream: () => eventStream,
     };
@@ -128,6 +130,7 @@ describe.each(implementations)('%s exclusive streaming lifecycle', (_, Session) 
       message: 'running',
     });
     session.agent = {
+      status: () => AgentStatus.IDLE,
       run: vi.fn().mockResolvedValue(
         (async function* () {
           yield sourceEvent;
@@ -147,5 +150,51 @@ describe.each(implementations)('%s exclusive streaming lifecycle', (_, Session) 
     expect(server.canAcceptNewRequest()).toBe(true);
     expect(server.clearRunningSession).toHaveBeenCalledOnce();
     expect(server.clearRunningSession).toHaveBeenCalledWith(sessionId);
+  });
+
+  it('does not clear an active stream slot when an overlapping request is rejected', async () => {
+    const server = createExclusiveServerStub();
+    const sessionId = 'overlapping-session';
+    const session = new Session(server, sessionId);
+    const eventStream = createEventStream();
+    let executing = false;
+    let releaseStream: (() => void) | undefined;
+    const streamGate = new Promise<void>(resolve => {
+      releaseStream = resolve;
+    });
+    const sourceEvent = eventStream.createEvent('system', {
+      level: 'info',
+      message: 'running',
+    });
+    const sourceStream = (async function* () {
+      await streamGate;
+      executing = false;
+      yield sourceEvent;
+    })();
+
+    session.agent = {
+      status: () => (executing ? AgentStatus.EXECUTING : AgentStatus.IDLE),
+      run: vi.fn().mockImplementation(async () => {
+        if (executing) {
+          throw new Error('already executing');
+        }
+        executing = true;
+        return sourceStream;
+      }),
+      getEventStream: () => eventStream,
+    };
+
+    const activeStream = await session.runQueryStreaming({ input: 'first' });
+    expect(server.getRunningSessionId()).toBe(sessionId);
+
+    const rejectedStream = await session.runQueryStreaming({ input: 'second' });
+    expect(server.getRunningSessionId()).toBe(sessionId);
+    expect(server.clearRunningSession).not.toHaveBeenCalled();
+
+    releaseStream?.();
+    await expect(collectEvents(activeStream)).resolves.toEqual([sourceEvent]);
+    await expect(collectEvents(rejectedStream)).resolves.toHaveLength(1);
+    expect(server.getRunningSessionId()).toBeNull();
+    expect(server.clearRunningSession).toHaveBeenCalledOnce();
   });
 });

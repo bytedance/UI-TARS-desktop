@@ -393,6 +393,7 @@ export class AgentSession {
       metadata?: AgentEventStream.EnvironmentInputMetadata;
     };
   }): Promise<AsyncIterable<AgentEventStream.Event>> {
+    const wasAlreadyExecuting = this.agent.status() === AgentStatus.EXECUTING;
     try {
       // Set running session for exclusive mode
       this.server.setRunningSession(this.id);
@@ -425,7 +426,9 @@ export class AgentSession {
       return this.wrapStreamForExclusiveMode(stream);
     } catch (error) {
       // No stream was created, so release the exclusive slot before returning an error stream
-      this.server.clearRunningSession(this.id);
+      if (!wasAlreadyExecuting) {
+        this.server.clearRunningSession(this.id);
+      }
 
       // Emit error event
       this.eventBridge.emit('error', {
