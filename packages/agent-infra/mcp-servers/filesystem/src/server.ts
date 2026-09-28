@@ -396,6 +396,19 @@ function createServer(args: { allowedDirectories: string[] }): McpServer {
       }
       const validSourcePath = await validatePath(parsed.data.source);
       const validDestPath = await validatePath(parsed.data.destination);
+      // The tool advertises that the operation fails when the destination
+      // exists, but fs.rename replaces an existing destination silently and
+      // loses its content. `lstat` also catches a dangling symlink, which
+      // rename would swap out for the moved file.
+      const destinationExists = await fs
+        .lstat(validDestPath)
+        .then(() => true)
+        .catch(() => false);
+      if (destinationExists) {
+        throw new Error(
+          `Destination already exists: ${parsed.data.destination}`,
+        );
+      }
       await fs.rename(validSourcePath, validDestPath);
       return {
         content: [
