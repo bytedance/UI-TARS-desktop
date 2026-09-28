@@ -96,25 +96,33 @@ async function validatePath(requestedPath: string): Promise<string> {
     return realPath;
   } catch (error) {
     console.error('[validatePath] error', error);
-    // For new files that don't exist yet, verify parent directory
-    const parentDir = path.dirname(absolute);
-    console.log('parentDir', parentDir);
-    try {
-      const realParentPath = await fs.realpath(parentDir);
-      const normalizedParent = normalizePath(realParentPath);
-      const isParentAllowed = allowedDirectories.some((dir) =>
-        normalizedParent.startsWith(dir),
-      );
-      if (!isParentAllowed) {
-        throw new Error(
-          'Access denied - parent directory outside allowed directories',
-        );
+    // The path does not exist yet, so validate the nearest existing ancestor
+    // instead of only the immediate parent — `create_directory` and `write_file`
+    // create the missing levels themselves, and an ancestor that is a symlink
+    // escaping the allowed roots still has to be caught here.
+    let ancestor = path.dirname(absolute);
+    let realAncestor: string | null = null;
+    while (realAncestor === null && ancestor !== path.dirname(ancestor)) {
+      realAncestor = await fs.realpath(ancestor).catch(() => null);
+      if (realAncestor === null) {
+        ancestor = path.dirname(ancestor);
       }
-      return absolute;
-    } catch (error) {
-      console.error('[validatePath] error_2', error);
-      throw new Error(`Parent directory does not exist: ${parentDir}`);
     }
+    if (realAncestor === null) {
+      throw new Error(
+        `Parent directory does not exist: ${path.dirname(absolute)}`,
+      );
+    }
+    const normalizedParent = normalizePath(realAncestor);
+    const isParentAllowed = allowedDirectories.some((dir) =>
+      normalizedParent.startsWith(dir),
+    );
+    if (!isParentAllowed) {
+      throw new Error(
+        'Access denied - parent directory outside allowed directories',
+      );
+    }
+    return absolute;
   }
 }
 
