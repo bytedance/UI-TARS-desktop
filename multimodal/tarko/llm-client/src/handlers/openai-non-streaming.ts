@@ -9,6 +9,7 @@ import { ChatCompletion } from 'openai/resources';
 import { OpenAIModel, ProviderCompletionParams } from '../chat/index.js';
 import { CompletionResponse, StreamCompletionResponse } from '../userTypes/index.js';
 import { BaseHandler } from './base.js';
+import { getOpenAIHttpAgent } from './openai-proxy.js';
 
 /**
  * Creates a synthetic stream from a non-streaming response
@@ -117,6 +118,7 @@ export class OpenAINonStreamingHandler extends BaseHandler<OpenAIModel> {
       ...this.opts,
       apiKey,
       defaultHeaders: this.opts.defaultHeaders,
+      httpAgent: getOpenAIHttpAgent(),
     });
 
     // We have to delete the provider field because it's not a valid parameter for the OpenAI API

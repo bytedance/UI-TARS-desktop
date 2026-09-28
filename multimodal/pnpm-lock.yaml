@@ -1325,6 +1325,9 @@ importers:
       openai:
         specifier: 4.93.0
         version: 4.93.0(ws@8.18.3)(zod@3.25.36)
+      proxy-agent:
+        specifier: 6.5.0
+        version: 6.5.0
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
