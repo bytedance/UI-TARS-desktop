@@ -17,6 +17,7 @@ import { DEFAULT_FACTORS } from '../src/constants';
 const getContext = vi.fn();
 vi.mock('openai', () => ({
   default: vi.fn(),
+  InternalServerError: class InternalServerError extends Error {},
 }));
 
 const image = new Jimp({
@@ -458,5 +459,56 @@ describe('GUIAgent', () => {
     ]);
 
     expect(onError).not.toHaveBeenCalled();
+  });
+
+  it('stops executing remaining actions after an operator error', async () => {
+    class FailingOperator extends MockOperator {
+      override execute = vi.fn().mockRejectedValue(new Error('action failed'));
+    }
+
+    class MultiActionModel extends UITarsModel {
+      constructor() {
+        super({ model: 'ui-tars' });
+      }
+
+      override async invoke() {
+        return {
+          prediction: 'multiple actions',
+          parsedPredictions: [
+            {
+              action_inputs: {},
+              action_type: 'click',
+              reflection: null,
+              thought: '',
+            },
+            {
+              action_inputs: {},
+              action_type: 'finished',
+              reflection: null,
+              thought: '',
+            },
+          ],
+        };
+      }
+    }
+
+    const operator = new FailingOperator();
+    const onError = vi.fn();
+    const agent = new GUIAgent({
+      model: new MultiActionModel(),
+      operator,
+      onError,
+    });
+
+    await agent.run('click the button');
+
+    expect(operator.execute).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.objectContaining({
+          message: 'Too many action execute failures: action failed',
+        }),
+      }),
+    );
   });
 });
