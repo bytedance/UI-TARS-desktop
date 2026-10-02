@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '@/common/constants';
 import { API_BASE_URL } from '@/config/web-ui-config';
+import { getAuthHeaders } from '@/common/services/authToken';
 
 /**
  * Share configuration interface
@@ -37,7 +38,7 @@ class ShareService {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SHARE_CONFIG}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       });
 
       if (!response.ok) {
@@ -62,7 +63,7 @@ class ShareService {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SESSIONS_SHARE}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ sessionId, upload }),
       });
 

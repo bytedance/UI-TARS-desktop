@@ -37,11 +37,14 @@ export async function startHeadlessServer(
       `${chalk.cyan('API URL:')} ${chalk.underline(serverUrl)}`,
       '',
       `${chalk.cyan('Bound to:')} ${chalk.yellow(`${server.host}:${port}`)}${
-        isExternallyReachableHost(server.host)
+        isExternallyReachableHost(server.host) && !server.auth.required
           ? ` ${chalk.red('- reachable from the network, and unauthenticated')}`
           : ''
       }`,
       '',
+      ...(server.auth.required
+        ? [`${chalk.cyan('Access token:')} ${chalk.yellow(server.auth.token!)}`, '']
+        : []),
       `${chalk.cyan('Mode:')} ${chalk.yellow('Headless (API only)')}`,
     ].join('\n');
 

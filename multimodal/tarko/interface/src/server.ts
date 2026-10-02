@@ -194,6 +194,30 @@ export interface AgentServerOptions {
      */
     host?: string;
     /**
+     * Access control for the API.
+     *
+     * Every endpoint can create sessions, read stored conversations and run
+     * agent queries, so a reachable server needs a credential rather than just
+     * a bind address: outside a browser a caller writes its own Host header.
+     */
+    auth?: {
+      /**
+       * `auto` requires a token once the bind address is reachable from another
+       * machine, or once one is configured here. `always` requires one on every
+       * bind, `never` disables the check.
+       *
+       * @default 'auto'
+       */
+      mode?: 'auto' | 'always' | 'never';
+      /**
+       * Token callers must present as `Authorization: Bearer <token>` or a
+       * `token` query parameter. Falls back to `TARKO_AUTH_TOKEN`, and when a
+       * token is required but none is configured the server generates one and
+       * prints it at startup.
+       */
+      token?: string;
+    };
+    /**
      * Server Storage options.
      */
     storage?: AgentStorageImplementation;

@@ -37,6 +37,7 @@
     "@types/supertest": "^6.0.2",
     "cors": "^2.8.5",
     "express": "4.21.2",
+    "express-rate-limit": "^7.5.0",
     "http-proxy-middleware": "^2.0.6",
     "lowdb": "^6.0.1",
     "nanoid": "^5.0.8",

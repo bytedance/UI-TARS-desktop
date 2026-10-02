@@ -65,6 +65,7 @@ export function buildAppConfig<
     quiet,
     port,
     host,
+    authToken,
     stream,
     headless,
     input,
@@ -120,7 +121,7 @@ export function buildAppConfig<
 
   // Apply CLI shortcuts
   applyLoggingShortcuts(config, { debug, quiet });
-  applyServerConfiguration(config, { port, host });
+  applyServerConfiguration(config, { port, host, authToken });
 
   // Apply WebUI defaults
   applyWebUIDefaults(config as AgentAppConfig);
@@ -246,7 +247,7 @@ function parseLogLevel(level: string): LogLevel | undefined {
  */
 function applyServerConfiguration(
   config: AgentAppConfig,
-  serverOptions: { port?: number; host?: string },
+  serverOptions: { port?: number; host?: string; authToken?: string },
 ): void {
   if (!config.server) {
     config.server = {
@@ -266,6 +267,10 @@ function applyServerConfiguration(
 
   if (serverOptions.host) {
     config.server.host = serverOptions.host;
+  }
+
+  if (serverOptions.authToken) {
+    config.server.auth = { ...config.server.auth, token: serverOptions.authToken };
   }
 
   config.server.host = resolveServerHost(config.server.host);
