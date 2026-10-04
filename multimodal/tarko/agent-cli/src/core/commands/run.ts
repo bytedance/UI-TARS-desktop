@@ -90,20 +90,44 @@ export async function processServerRun(options: AgentCLIRunCommandOptions): Prom
 
         await server.start();
 
-        const response = await fetch(
-          `http://localhost:${appConfig.server!.port}/api/v1/oneshot/query`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              query: input,
-              sessionName: input,
-              sessionTags: ['run'],
-            }),
+        const serverUrl = `http://localhost:${appConfig.server!.port}`;
+        const authHeaders: Record<string, string> = server.auth.required
+          ? { Authorization: `Bearer ${server.auth.token}` }
+          : {};
+        const csrfResponse = await fetch(`${serverUrl}/api/v1/csrf-token`, {
+          headers: authHeaders,
+        });
+
+        if (!csrfResponse.ok) {
+          throw new Error(
+            `Failed to obtain CSRF token: ${csrfResponse.statusText}`,
+          );
+        }
+
+        const csrfPayload: unknown = await csrfResponse.json();
+        if (
+          typeof csrfPayload !== 'object' ||
+          csrfPayload === null ||
+          !('token' in csrfPayload) ||
+          typeof csrfPayload.token !== 'string' ||
+          csrfPayload.token.length === 0
+        ) {
+          throw new Error('Server returned an invalid CSRF token');
+        }
+
+        const response = await fetch(`${serverUrl}/api/v1/oneshot/query`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders,
+            'X-CSRF-Token': csrfPayload.token,
           },
-        );
+          body: JSON.stringify({
+            query: input,
+            sessionName: input,
+            sessionTags: ['run'],
+          }),
+        });
 
         if (!response.ok) {
           throw new Error(`Server request failed: ${response.statusText}`);
