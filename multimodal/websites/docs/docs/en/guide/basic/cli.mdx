@@ -43,6 +43,8 @@ Agent TARS CLI provides several common flags that can be used with most commands
 | ----------------------------- | ------------------------------------------------------------------------------------------ |
 | `-c, --config <path>`         | Path to configuration file(s) or URL(s), supports multiple values                          |
 | `--port <port>`               | Port to run the server on (default: 8888)                                                  |
+| `--host <host>`               | Network interface to bind (default: `127.0.0.1`), see [Remote access](#remote-access)      |
+| `--auth-token <token>`        | Access token for the API, also read from `TARKO_AUTH_TOKEN`                                |
 | `--open`                      | Open the web UI in the default browser on server start                                     |
 | `--logLevel <level>`          | Specify the log level (debug, info, warn, error)                                           |
 | `--debug`                     | Enable debug mode (show tool calls and system events)                                      |
@@ -90,6 +92,31 @@ Options:
 ```
 
 Currently, this command is similar to the interactive UI mode but intended for headless operation.
+
+## Remote access
+
+The server binds `127.0.0.1` by default, so only the local machine can reach it. Use `--host` to accept connections from other machines:
+
+```bash
+agent-tars --host 0.0.0.0
+```
+
+Once the server is reachable from other machines, every API request needs an access token. If none is set, a random token is generated at startup and printed together with a link that signs the Web UI in. To keep the same token across restarts, set `TARKO_AUTH_TOKEN` or pass `--auth-token` (at least 16 characters). API clients send the token as `Authorization: Bearer <token>`.
+
+If the Web UI is opened at an address other than `http://localhost:<port>` or `http://127.0.0.1:<port>`, for example through a reverse proxy or a domain name, also allow that host and origin:
+
+```bash
+TARKO_AUTH_TOKEN=<token> \
+TARKO_ALLOWED_HOSTS=agent.example.com \
+TARKO_ALLOWED_ORIGINS=https://agent.example.com \
+agent-tars --host 0.0.0.0
+```
+
+| Environment variable | Description |
+| --- | --- |
+| `TARKO_AUTH_TOKEN` | Access token, same as `--auth-token` |
+| `TARKO_ALLOWED_HOSTS` | Comma-separated hostnames the server answers on, besides `localhost` and IP addresses on the server port. An entry without a port matches any port. Other hostnames get `403 Invalid Host header` |
+| `TARKO_ALLOWED_ORIGINS` | Comma-separated origins (`scheme://host[:port]`) allowed to call the API from a browser, besides `http://localhost:<port>` and `http://127.0.0.1:<port>` |
 
 ## agent-tars request
 

@@ -43,6 +43,8 @@ Agent TARS CLI 提供了一些 Common Flags，可以与大多数命令一起使�
 | ----------------------------- | ------------------------------------------------------------------------------------------ |
 | `-c, --config <path>`         | 配置文件或 URL 的路径，支持多个值                          |
 | `--port <port>`               | 服务器运行的端口（默认：8888）                                                     |
+| `--host <host>`               | 服务器监听的网络地址（默认：`127.0.0.1`），参见[远程访问](#远程访问)                |
+| `--auth-token <token>`        | API 访问令牌，也可通过 `TARKO_AUTH_TOKEN` 设置                                       |
 | `--open`                      | 在服务器启动时在默认浏览器中打开 Web UI                                      |
 | `--logLevel <level>`          | 指定日志级别（debug、info、warn、error）                                           |
 | `--debug`                     | 启用调试模式（显示工具调用和系统事件）                                      |
@@ -90,6 +92,31 @@ Options:
 ```
 
 目前，此命令与交互式 UI 模式类似，但用于无头操作。
+
+## 远程访问
+
+服务器默认只监听 `127.0.0.1`，只有本机可以访问。需要从其他机器访问时，使用 `--host` 指定监听地址：
+
+```bash
+agent-tars --host 0.0.0.0
+```
+
+服务器可以被其他机器访问时，所有 API 请求都需要携带访问令牌。如果没有设置令牌，启动时会随机生成一个，并打印一个带令牌的 Web UI 登录链接。如需在重启后继续使用同一个令牌，请设置 `TARKO_AUTH_TOKEN` 或传入 `--auth-token`（至少 16 个字符）。API 客户端通过 `Authorization: Bearer <token>` 请求头发送令牌。
+
+如果通过 `http://localhost:<port>` 和 `http://127.0.0.1:<port>` 以外的地址打开 Web UI，例如经过反向代理或使用域名访问，还需要放行对应的主机名和来源：
+
+```bash
+TARKO_AUTH_TOKEN=<token> \
+TARKO_ALLOWED_HOSTS=agent.example.com \
+TARKO_ALLOWED_ORIGINS=https://agent.example.com \
+agent-tars --host 0.0.0.0
+```
+
+| 环境变量 | 说明 |
+| --- | --- |
+| `TARKO_AUTH_TOKEN` | 访问令牌，作用与 `--auth-token` 相同 |
+| `TARKO_ALLOWED_HOSTS` | 允许的主机名，多个用逗号分隔；`localhost` 和使用服务器端口的 IP 地址始终允许。不带端口的条目匹配任意端口。其他主机名的请求返回 `403 Invalid Host header` |
+| `TARKO_ALLOWED_ORIGINS` | 允许从浏览器调用 API 的来源（`scheme://host[:port]`），多个用逗号分隔；`http://localhost:<port>` 和 `http://127.0.0.1:<port>` 始终允许 |
 
 ## agent-tars request
 

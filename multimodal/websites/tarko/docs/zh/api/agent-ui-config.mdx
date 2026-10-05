@@ -126,7 +126,7 @@ interface WelcomeCard {
   prompt: string         // 提示内容
   image?: string         // 背景图片 URL
   category: string       // 分组类别
-  agentOptions?: Record<string, any>  // Agent 配置
+  agentOptions?: Record<string, any>  // 新会话的一次性 Agent 选项
 }
 ```
 
@@ -138,10 +138,12 @@ welcomeCards: [
     prompt: '审查我最新的 Pull Request',
     category: '开发',
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
-    agentOptions: { mode: 'review' }
+    agentOptions: { agentMode: 'review' }
   }
 ]
 ```
+
+服务器只接受 `agentOptions` 中的 `agentMode`。卡片中包含其他字段时，会话创建会失败并返回 `400 Unsupported agentOptions`；其他选项请在服务器端配置。
 
 ### 工作区配置
 

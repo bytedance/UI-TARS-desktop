@@ -126,7 +126,7 @@ interface WelcomeCard {
   prompt: string         // Prompt content
   image?: string         // Background image URL
   category: string       // Grouping category
-  agentOptions?: Record<string, any>  // Agent configuration
+  agentOptions?: Record<string, any>  // One-time Agent options for the new session
 }
 ```
 
@@ -138,10 +138,12 @@ welcomeCards: [
     prompt: 'Review my latest pull request',
     category: 'Development',
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
-    agentOptions: { mode: 'review' }
+    agentOptions: { agentMode: 'review' }
   }
 ]
 ```
+
+The server only accepts `agentMode` in `agentOptions`. A card carrying any other key fails to create a session with `400 Unsupported agentOptions`; configure other options on the server instead.
 
 ### Workspace Configuration
 
