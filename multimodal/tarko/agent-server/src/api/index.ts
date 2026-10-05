@@ -57,6 +57,8 @@ function isAllowedOrigin(origin: string | undefined, port: number): boolean {
   return false;
 }
 
+class OriginNotAllowedError extends Error {}
+
 /**
  * Get CORS options with origin whitelist based on server port.
  */
@@ -69,13 +71,28 @@ export function getDefaultCorsOptions(port: number): cors.CorsOptions {
       if (isAllowedOrigin(origin, port)) {
         callback(null, true);
       } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS policy`));
+        callback(new OriginNotAllowedError(`Origin ${origin} not allowed by CORS policy`));
       }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   };
 }
+
+/**
+ * Answers a rejected origin with a 403 that names the setting to change, where
+ * Express would otherwise turn the CORS error into a 500.
+ */
+const rejectDisallowedOrigin: express.ErrorRequestHandler = (err, _req, res, next) => {
+  if (!(err instanceof OriginNotAllowedError)) {
+    next(err);
+    return;
+  }
+  res.status(403).json({
+    error: 'Origin not allowed',
+    message: `${err.message}. Set TARKO_ALLOWED_ORIGINS to allow additional origins.`,
+  });
+};
 
 /**
  * Security headers middleware
@@ -119,6 +136,7 @@ export function setupAPI(
 
   // Apply CORS middleware with origin whitelist
   app.use(cors(getDefaultCorsOptions(port)));
+  app.use(rejectDisallowedOrigin);
 
   // Apply JSON body parser middleware
   app.use(express.json({ limit: '20mb' }));
