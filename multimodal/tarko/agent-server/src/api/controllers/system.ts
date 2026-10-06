@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import { sanitizeAgentOptions } from '../../utils/config-sanitizer';
+import { filterDeclaredRuntimeSettings } from '@tarko/shared-utils';
 import { getPublicAvailableModels, isModelConfigValid } from '../../utils/model-utils';
 
 export function healthCheck(req: Request, res: Response) {
@@ -86,7 +87,7 @@ export async function getRuntimeSettings(req: Request, res: Response) {
  * Requires sessionId parameter
  */
 export async function updateRuntimeSettings(req: Request, res: Response) {
-  const { sessionId, runtimeSettings } = req.body as {
+  const { sessionId, runtimeSettings: requestedRuntimeSettings } = req.body as {
     sessionId: string;
     runtimeSettings: Record<string, any>;
   };
@@ -95,12 +96,19 @@ export async function updateRuntimeSettings(req: Request, res: Response) {
     return res.status(400).json({ error: 'Session ID is required' });
   }
 
-  if (!runtimeSettings || typeof runtimeSettings !== 'object') {
+  if (!requestedRuntimeSettings || typeof requestedRuntimeSettings !== 'object') {
     return res.status(400).json({ error: 'Runtime settings object is required' });
   }
 
   try {
     const server = req.app.locals.server;
+
+    // Session metadata is replayed into the Agent constructor on every
+    // initialization, so persist only the keys the server declared.
+    const { value: runtimeSettings } = filterDeclaredRuntimeSettings(
+      requestedRuntimeSettings,
+      server.appConfig?.server?.runtimeSettings?.schema,
+    );
 
     if (!server.storageProvider) {
       return res.status(404).json({ error: 'Storage not configured, cannot update runtime settings' });

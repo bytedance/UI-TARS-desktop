@@ -9,6 +9,7 @@ import {
   ContextStorageHook,
   createCorsHook,
   createCsrfProtectionHook,
+  createHostValidationHook,
   SecurityHeadersHook,
 } from '../src/index';
 import { resolve } from 'path';
@@ -147,6 +148,7 @@ const logger = {
 };
 
 server.setLogger(logger);
+server.registerHook(createHostValidationHook(server.port));
 server.registerHook(SecurityHeadersHook);
 server.registerHook(AuthHook);
 server.registerHook(createCorsHook(server.port));

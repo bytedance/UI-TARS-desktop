@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useStableValue } from '@/common/hooks/useStableValue';
+import { HTML_PREVIEW_SANDBOX } from '@/common/constants/iframeSandbox';
 
 interface ThrottledHtmlRendererProps {
   content: string;
@@ -7,113 +8,90 @@ interface ThrottledHtmlRendererProps {
   className?: string;
 }
 
+/** Minimum gap between two document swaps while content is still streaming in. */
+const STREAMING_UPDATE_INTERVAL = 200;
+
+const FRAME_INDEXES = [0, 1] as const;
+
 /**
- * ThrottledHtmlRenderer - A component that renders HTML content with throttling to prevent flickering
+ * ThrottledHtmlRenderer - renders HTML content in a sandboxed iframe
  *
- * Features:
- * - Throttled updates during streaming to reduce flickering
- * - Smooth DOM replacement instead of full rebuild
- * - Automatic iframe sizing and content injection
+ * The frame is sandboxed without `allow-same-origin`, so its document lives in an opaque
+ * origin and is unreachable from here: content can only be handed over through `srcDoc`.
+ * To keep streaming updates smooth without touching the frame's DOM, two frames alternate —
+ * the next document is parsed in the hidden one and swapped in once it has loaded, so the
+ * viewer never sees a blank frame mid-stream.
  */
 export const ThrottledHtmlRenderer: React.FC<ThrottledHtmlRendererProps> = ({
   content,
   isStreaming = false,
   className = '',
 }) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [lastRenderedContent, setLastRenderedContent] = useState('');
-  const renderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [frameContents, setFrameContents] = useState<[string, string]>(['', '']);
+  const [visibleIndex, setVisibleIndex] = useState(0);
+
+  const frameContentsRef = useRef<[string, string]>(['', '']);
+  const visibleIndexRef = useRef(0);
+  const pendingIndexRef = useRef<number | null>(null);
+  const renderedContentRef = useRef('');
+  const lastRenderAtRef = useRef(0);
+  const renderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Use stable content to reduce unnecessary updates
   const stableContent = useStableValue(content, (a, b) => a === b);
 
+  const showFrame = (index: number) => {
+    visibleIndexRef.current = index;
+    setVisibleIndex(index);
+  };
+
   // Throttling logic for streaming updates
   useEffect(() => {
-    if (!iframeRef.current) return;
-
-    // Clear any pending render
-    if (renderTimeoutRef.current) {
-      clearTimeout(renderTimeoutRef.current);
-    }
-
-    const shouldRender = () => {
-      if (stableContent === lastRenderedContent) return false;
-
-      // If not streaming, render immediately
-      if (!isStreaming) return true;
-
-      // During streaming, throttle updates to reduce flickering
-      const contentDelta = Math.abs(stableContent.length - lastRenderedContent.length);
-      const shouldThrottle = contentDelta < 100; // Only throttle small changes
-
-      return !shouldThrottle;
-    };
+    if (stableContent === renderedContentRef.current) return;
 
     const renderContent = () => {
-      if (!iframeRef.current || stableContent === lastRenderedContent) return;
+      renderTimeoutRef.current = null;
+      renderedContentRef.current = stableContent;
+      lastRenderAtRef.current = Date.now();
 
-      try {
-        const iframe = iframeRef.current;
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      const targetIndex = visibleIndexRef.current === 0 ? 1 : 0;
 
-        if (!iframeDoc) return;
-
-        // For streaming, try to update content smoothly
-        if (isStreaming && lastRenderedContent) {
-          // Check if we can do partial update
-          if (stableContent.startsWith(lastRenderedContent)) {
-            // Content is appended, try to append to existing DOM
-            const additionalContent = stableContent.slice(lastRenderedContent.length);
-            if (additionalContent.trim()) {
-              // Create a temporary container to parse new content
-              const tempDiv = iframeDoc.createElement('div');
-              tempDiv.innerHTML = additionalContent;
-
-              // Append new nodes to body
-              while (tempDiv.firstChild) {
-                iframeDoc.body.appendChild(tempDiv.firstChild);
-              }
-
-              setLastRenderedContent(stableContent);
-              return;
-            }
-          }
-        }
-
-        // Full content replacement for non-streaming or significant changes
-        iframeDoc.open();
-        iframeDoc.write(stableContent);
-        iframeDoc.close();
-
-        // Ensure white background for HTML content
-        if (iframeDoc.body) {
-          iframeDoc.body.style.backgroundColor = 'white';
-        }
-
-        setLastRenderedContent(stableContent);
-      } catch (error) {
-        console.warn('Failed to update iframe content:', error);
-        // Fallback to srcDoc update
-        if (iframeRef.current) {
-          iframeRef.current.srcDoc = stableContent;
-          setLastRenderedContent(stableContent);
-        }
+      // An unchanged srcDoc fires no load event, so nothing would trigger the swap
+      if (frameContentsRef.current[targetIndex] === stableContent) {
+        pendingIndexRef.current = null;
+        showFrame(targetIndex);
+        return;
       }
+
+      frameContentsRef.current =
+        targetIndex === 0
+          ? [stableContent, frameContentsRef.current[1]]
+          : [frameContentsRef.current[0], stableContent];
+      pendingIndexRef.current = targetIndex;
+      setFrameContents(frameContentsRef.current);
     };
 
-    if (shouldRender()) {
+    // Outside streaming every change is final, so render it right away
+    if (!isStreaming) {
       renderContent();
-    } else if (isStreaming) {
-      // Schedule throttled update during streaming
-      renderTimeoutRef.current = setTimeout(renderContent, 200);
+      return;
     }
+
+    const elapsed = Date.now() - lastRenderAtRef.current;
+    if (elapsed >= STREAMING_UPDATE_INTERVAL) {
+      renderContent();
+      return;
+    }
+
+    renderTimeoutRef.current = setTimeout(renderContent, STREAMING_UPDATE_INTERVAL - elapsed);
 
     return () => {
       if (renderTimeoutRef.current) {
         clearTimeout(renderTimeoutRef.current);
+        renderTimeoutRef.current = null;
       }
     };
-  }, [stableContent, isStreaming, lastRenderedContent]);
+  }, [stableContent, isStreaming]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -124,18 +102,28 @@ export const ThrottledHtmlRenderer: React.FC<ThrottledHtmlRendererProps> = ({
     };
   }, []);
 
+  const handleFrameLoad = (index: number) => {
+    if (pendingIndexRef.current !== index) return;
+    pendingIndexRef.current = null;
+    showFrame(index);
+  };
+
   return (
     <div
-      className={`border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white ${className}`}
+      className={`relative min-h-[100vh] border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white ${className}`}
     >
-      <iframe
-        ref={iframeRef}
-        className="w-full border-0 min-h-[100vh]"
-        title="HTML Preview"
-        sandbox="allow-scripts allow-same-origin"
-        // Don't use srcDoc for streaming content to allow manual DOM updates
-        srcDoc={!isStreaming ? stableContent : undefined}
-      />
+      {FRAME_INDEXES.map((index) => (
+        <iframe
+          key={index}
+          className={`absolute inset-0 w-full h-full border-0 ${
+            index === visibleIndex ? '' : 'invisible pointer-events-none'
+          }`}
+          title="HTML Preview"
+          sandbox={HTML_PREVIEW_SANDBOX}
+          srcDoc={frameContents[index]}
+          onLoad={() => handleFrameLoad(index)}
+        />
+      ))}
     </div>
   );
 };

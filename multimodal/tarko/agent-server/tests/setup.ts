@@ -44,14 +44,18 @@ vi.mock('@tarko/shared-media-utils', () => ({
   default: {},
 }));
 
-vi.mock('@tarko/shared-utils', () => ({
-  getLogger: vi.fn(() => ({
-    debug: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  })),
-}));
+vi.mock('@tarko/shared-utils', async () => {
+  const actual = await vi.importActual<Record<string, unknown>>('@tarko/shared-utils');
+  return {
+    ...actual,
+    getLogger: vi.fn(() => ({
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    })),
+  };
+});
 
 vi.mock('@tarko/agent-snapshot', () => ({
   AgentSnapshot: vi.fn().mockImplementation((agent) => agent),

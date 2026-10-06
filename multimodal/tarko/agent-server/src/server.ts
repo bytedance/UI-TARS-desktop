@@ -18,6 +18,8 @@ import type {
   AgioProviderConstructor,
 } from './types';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
+import { resolveServerHost } from '@tarko/shared-utils';
+import { resolveServerAuth, type ResolvedServerAuth } from './api/middleware';
 
 export { express };
 
@@ -48,6 +50,9 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
   // Configuration
   public readonly port: number;
+  public readonly host: string;
+  /** Whether callers must present a token, and the token itself when they must. */
+  public readonly auth: ResolvedServerAuth;
   public readonly isDebug: boolean;
   public readonly isExclusive: boolean;
   public readonly storageProvider: StorageProvider | null = null;
@@ -79,6 +84,12 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Extract server configuration from agent options
     this.port = appConfig.server?.port ?? 3000;
+    this.host = resolveServerHost(appConfig.server?.host);
+    this.auth = resolveServerAuth({
+      host: this.host,
+      mode: appConfig.server?.auth?.mode,
+      token: appConfig.server?.auth?.token,
+    });
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
     this.isExclusive = appConfig.server?.exclusive ?? false;
 
@@ -96,6 +107,8 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       workspacePath: this.getCurrentWorkspace(),
       isDebug: this.isDebug,
       port: this.port,
+      host: this.host,
+      authToken: this.auth.token,
     });
 
     // Make server instance available to request handlers
@@ -256,7 +269,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     }
 
     return new Promise((resolve) => {
-      this.server.listen(this.port, () => {
+      this.server.listen(this.port, this.host, () => {
         this.isRunning = true;
         resolve(this.server);
       });

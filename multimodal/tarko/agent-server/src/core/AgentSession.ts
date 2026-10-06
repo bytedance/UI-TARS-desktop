@@ -15,6 +15,7 @@ import {
   IAgent,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
+import { filterDeclaredRuntimeSettings, sanitizeSessionAgentOptions } from '@tarko/shared-utils';
 import { EventStreamBridge } from '../utils/event-stream';
 import type { AgentServer } from '../server';
 import { AgioEvent } from '@tarko/agio';
@@ -171,21 +172,41 @@ export class AgentSession {
 
     // Apply runtime settings transformation if available
     const runtimeSettingsConfig = this.server.appConfig?.server?.runtimeSettings;
-    let transformedOptions = sessionInfo?.metadata?.runtimeSettings ?? {};
 
-    if (runtimeSettingsConfig?.transform && sessionInfo?.metadata?.runtimeSettings) {
+    // Runtime settings arrive from the client and land in session metadata, so
+    // reduce them to the keys the server declared before they reach the Agent.
+    const { value: declaredRuntimeSettings } = filterDeclaredRuntimeSettings(
+      sessionInfo?.metadata?.runtimeSettings,
+      runtimeSettingsConfig?.schema,
+    );
+    const hasDeclaredRuntimeSettings = Object.keys(declaredRuntimeSettings).length > 0;
+
+    // A server-provided transform maps settings onto agent options; its output is
+    // server code and stays free to override configuration. Without a transform the
+    // declared settings are passed through as plain values instead.
+    let trustedOverrides: Record<string, any> = {};
+    let clientRuntimeOverrides: Record<string, any> = declaredRuntimeSettings;
+
+    if (runtimeSettingsConfig?.transform && hasDeclaredRuntimeSettings) {
+      clientRuntimeOverrides = {};
       try {
-        transformedOptions = runtimeSettingsConfig.transform(sessionInfo.metadata.runtimeSettings);
+        trustedOverrides = runtimeSettingsConfig.transform(declaredRuntimeSettings) ?? {};
       } catch (error) {
         console.warn('Failed to apply runtime settings transform:', error);
       }
     }
 
-    // Merge base options with transformed runtime settings and one-time agent options
+    // One-time options are allowlisted at the API boundary; re-apply the allowlist
+    // here so no other caller can widen it.
+    const { value: sessionAgentOptions } = sanitizeSessionAgentOptions(this.agentOptions);
+
+    // Client-derived values are applied first so server configuration always wins.
+    // Only the server's own transform output may override it.
     const agentOptions = {
+      ...clientRuntimeOverrides,
+      ...(sessionAgentOptions ?? {}),
       ...baseAgentOptions,
-      ...transformedOptions,
-      ...(this.agentOptions || {}), // Apply one-time agent initialization options
+      ...trustedOverrides,
     };
 
     // Create base agent

@@ -58,6 +58,7 @@ describe('buildAppConfig', () => {
             "provider": "openai",
           },
           "server": {
+            "host": "127.0.0.1",
             "port": 3000,
             "storage": {
               "type": "sqlite",
@@ -234,6 +235,7 @@ describe('buildAppConfig', () => {
       const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server).toEqual({
+        host: '127.0.0.1',
         port: 8888, // Default port
         storage: {
           type: 'sqlite',
@@ -255,6 +257,7 @@ describe('buildAppConfig', () => {
       const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server).toEqual({
+        host: '127.0.0.1',
         port: 3000, // CLI overrides user config
         storage: {
           type: 'sqlite',
@@ -300,6 +303,7 @@ describe('buildAppConfig', () => {
       const result = buildAppConfig(cliArgs, {});
 
       expect(result.server).toEqual({
+        host: '127.0.0.1',
         port: 8888, // Default port always added
         storage: {
           type: 'sqlite',
@@ -340,6 +344,7 @@ describe('buildAppConfig', () => {
             "provider": "openai",
           },
           "server": {
+            "host": "127.0.0.1",
             "port": 8888,
             "storage": {
               "type": "sqlite",
@@ -455,6 +460,7 @@ describe('buildAppConfig', () => {
             "provider": "openai",
           },
           "server": {
+            "host": "127.0.0.1",
             "port": 8888,
             "storage": {
               "type": "sqlite",
@@ -612,6 +618,7 @@ describe('buildAppConfig', () => {
       const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server).toEqual({
+        host: '127.0.0.1',
         port: 9999,
         storage: {
           type: 'file',
@@ -681,6 +688,7 @@ describe('buildAppConfig', () => {
       const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server).toEqual({
+        host: '127.0.0.1',
         port: 9999,
         storage: {
           type: 'file',

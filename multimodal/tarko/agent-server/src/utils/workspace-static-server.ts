@@ -277,17 +277,7 @@ export function setupWorkspaceStaticServer(
   // Serve workspace files with lower priority (after web UI)
   // Use a middleware function to handle directory listing and file serving
   app.use('/', (req, res, next) => {
-    // Skip if this looks like an API request
-    if (req.path.startsWith('/api/')) {
-      return next();
-    }
-
-    // Skip if this looks like a web UI route (no file extension and not a static asset)
-    if (
-      !req.path.includes('.') &&
-      !req.path.startsWith('/static/') &&
-      !req.path.startsWith('/assets/')
-    ) {
+    if (!isWorkspaceFileRequest(req.path)) {
       return next();
     }
 
@@ -334,4 +324,24 @@ export function setupWorkspaceStaticServer(
     // File not found, continue to next middleware
     next();
   });
+}
+
+/**
+ * Whether a request is one the workspace static server would try to answer:
+ * not an API call, and either carrying a file extension or sitting under a
+ * static asset prefix. Anything else falls through to the web UI shell.
+ *
+ * Exported so authentication can be placed in front of exactly these requests
+ * without a second copy of the rule drifting out of step with this one.
+ */
+export function isWorkspaceFileRequest(requestPath: string): boolean {
+  if (requestPath.startsWith('/api/')) {
+    return false;
+  }
+
+  return (
+    requestPath.includes('.') ||
+    requestPath.startsWith('/static/') ||
+    requestPath.startsWith('/assets/')
+  );
 }

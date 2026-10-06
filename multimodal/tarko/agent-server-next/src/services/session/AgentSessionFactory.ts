@@ -12,6 +12,25 @@ import type { AgioProviderConstructor, SessionInfo } from '@tarko/interface';
 import { ISessionDAO } from '../../dao';
 import { getDefaultModel } from '../../utils/model-utils';
 import { getLogger } from '../../utils/logger';
+import {
+  ALLOWED_SESSION_AGENT_OPTION_KEYS,
+  filterDeclaredRuntimeSettings,
+  sanitizeSessionAgentOptions,
+} from '@tarko/shared-utils';
+
+/**
+ * Raised when a session creation payload carries options the server will not accept.
+ * Controllers map this to a 400 instead of a generic failure.
+ */
+export class InvalidSessionInputError extends Error {
+  constructor(
+    message: string,
+    readonly details: Record<string, unknown> = {},
+  ) {
+    super(message);
+    this.name = 'InvalidSessionInputError';
+  }
+}
 
 export interface CreateSessionOptions {
   sessionId?: string;
@@ -55,10 +74,31 @@ export class AgentSessionFactory {
     // Get runtimeSettings and agentOptions from request body
     const body = await c.req.json().catch(() => ({}));
 
-    const { runtimeSettings, agentOptions } = body as {
+    const {
+      runtimeSettings: requestedRuntimeSettings,
+      agentOptions: requestedAgentOptions,
+    } = body as {
       runtimeSettings?: Record<string, any>;
       agentOptions?: Record<string, any>;
     };
+
+    // Both fields are merged into the Agent constructor, so accept only the
+    // allowlisted agent options and only runtime settings the server declared.
+    const { value: agentOptions, rejectedKeys } =
+      sanitizeSessionAgentOptions(requestedAgentOptions);
+    if (rejectedKeys.length > 0) {
+      throw new InvalidSessionInputError('Unsupported agentOptions', {
+        message: `agentOptions may only contain ${ALLOWED_SESSION_AGENT_OPTION_KEYS.join(', ')}; rejected: ${rejectedKeys.join(', ')}. Configure anything else on the server.`,
+        allowed: ALLOWED_SESSION_AGENT_OPTION_KEYS,
+        rejected: rejectedKeys,
+      });
+    }
+
+    const { value: runtimeSettings } = filterDeclaredRuntimeSettings(
+      requestedRuntimeSettings,
+      server.appConfig?.server?.runtimeSettings?.schema,
+    );
+    const hasRuntimeSettings = Object.keys(runtimeSettings).length > 0;
 
     // Allocate sandbox if scheduler is available
     let sandboxUrl: string | undefined;
@@ -98,7 +138,7 @@ export class AgentSessionFactory {
           }),
         sandboxUrl,
         // Include runtime settings if provided (persistent session settings)
-        ...(runtimeSettings && {
+        ...(hasRuntimeSettings && {
           runtimeSettings,
         }),
         // Include agent options if provided (one-time initialization options)

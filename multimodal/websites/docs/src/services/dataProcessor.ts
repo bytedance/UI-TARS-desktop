@@ -1,4 +1,4 @@
-import { ApiShareItem } from './api';
+import { ApiShareItem } from '../shared/types';
 
 export type CategoryType =
   | 'ai-browser'
@@ -221,7 +221,7 @@ function transformApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
     category,
     imageUrl,
     link: secureUrl,
-    date: apiItem.date,
+    date: apiItem.date ?? undefined,
     languages,
     tags,
     author,

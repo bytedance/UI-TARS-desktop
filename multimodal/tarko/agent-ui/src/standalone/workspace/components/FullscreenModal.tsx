@@ -5,6 +5,7 @@ import { MarkdownRenderer } from '@tarko/ui';
 import { MessageContent } from './shared';
 import { FullscreenFileData } from '../types/panelContent';
 import { normalizeFilePath } from '@tarko/ui';
+import { HTML_PREVIEW_SANDBOX } from '@/common/constants/iframeSandbox';
 
 interface FullscreenModalProps {
   data: FullscreenFileData | null;
@@ -85,7 +86,7 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
                 srcDoc={data.content}
                 className="w-full h-full border-0"
                 title="HTML Preview"
-                sandbox="allow-scripts allow-same-origin"
+                sandbox={HTML_PREVIEW_SANDBOX}
                 style={{ backgroundColor: 'white' }}
               />
             </div>
