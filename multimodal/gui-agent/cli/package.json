@@ -1,6 +1,6 @@
 {
   "name": "@gui-agent/cli",
-  "version": "0.3.0",
+  "version": "0.3.1-beta.0",
   "description": "CLI for GUI Agent",
   "repository": {
     "type": "git",
