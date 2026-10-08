@@ -111,14 +111,13 @@ function sanitizeTool(tool: Tool): SanitizedTool {
 function sanitizeApiKey(apiKey?: string): string | undefined {
   if (!apiKey) return undefined;
 
-  if (apiKey.length <= 8) {
+  if (apiKey.length <= 11) {
     return '*'.repeat(apiKey.length);
   }
 
-  // Show first 4 and last 4 characters, mask the middle
   const start = apiKey.substring(0, 4);
   const end = apiKey.substring(apiKey.length - 4);
-  const middle = '*'.repeat(Math.max(apiKey.length - 8, 3));
+  const middle = '*'.repeat(apiKey.length - 8);
 
   return `${start}${middle}${end}`;
 }
