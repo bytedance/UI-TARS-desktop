@@ -221,7 +221,16 @@ export class NutJSOperator extends Operator {
             screenHeight,
           });
 
-          if (startX && startY && endX && endY) {
+          if (
+            startX !== null &&
+            startY !== null &&
+            endX !== null &&
+            endY !== null &&
+            Number.isFinite(startX) &&
+            Number.isFinite(startY) &&
+            Number.isFinite(endX) &&
+            Number.isFinite(endY)
+          ) {
             logger.info(
               `[NutjsOperator] drag coordinates: startX=${startX}, startY=${startY}, endX=${endX}, endY=${endY}`,
             );

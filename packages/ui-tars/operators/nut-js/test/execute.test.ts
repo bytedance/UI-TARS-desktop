@@ -238,4 +238,28 @@ describe('execute', () => {
       straightTo(new Point(138.24, 589.68)),
     );
   });
+
+  it('drag can start and end at the screen origin', async () => {
+    const nutJSOperator = new NutJSOperator();
+    const executeParams: ExecuteParams = {
+      prediction: "Action: drag(start_box='(0,0)', end_box='(0,0)')",
+      parsedPrediction: {
+        reflection: '',
+        thought: 'Drag from the screen origin.',
+        action_type: 'drag',
+        action_inputs: {
+          start_box: '[0,0,0,0]',
+          end_box: '[0,0,0,0]',
+        },
+      },
+      screenWidth: 1920,
+      screenHeight: 1080,
+      scaleFactor: 1,
+    };
+
+    await nutJSOperator.execute(executeParams);
+
+    expect(mouse.move).toHaveBeenCalledWith(straightTo(new Point(0, 0)));
+    expect(mouse.drag).toHaveBeenCalledWith(straightTo(new Point(0, 0)));
+  });
 });

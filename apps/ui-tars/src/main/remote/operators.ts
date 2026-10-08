@@ -285,7 +285,16 @@ export class RemoteComputerOperator extends Operator {
           const endX = rawEndX !== null ? Math.round(rawEndX) : null;
           const endY = rawEndY !== null ? Math.round(rawEndY) : null;
 
-          if (startX && startY && endX && endY) {
+          if (
+            startX !== null &&
+            startY !== null &&
+            endX !== null &&
+            endY !== null &&
+            Number.isFinite(startX) &&
+            Number.isFinite(startY) &&
+            Number.isFinite(endX) &&
+            Number.isFinite(endY)
+          ) {
             await this.remoteComputer.dragMouse(startX, startY, endX, endY);
           }
         }

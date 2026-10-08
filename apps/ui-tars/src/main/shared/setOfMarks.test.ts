@@ -130,3 +130,23 @@ const testMakeScreenMarker = () => {
 test('not throw error', () => {
   expect(() => testMakeScreenMarker()).not.toThrow();
 });
+
+test('renders a click overlay at the screen origin', () => {
+  const { overlays } = setOfMarksOverlays({
+    predictions: [
+      {
+        reflection: '',
+        thought: '',
+        action_type: 'click',
+        action_inputs: { start_box: '[0,0,0,0]' },
+      },
+    ],
+    screenshotContext: {
+      size: { width: 1920, height: 1080 },
+      scaleFactor: 1,
+    },
+  });
+
+  expect(overlays).toHaveLength(1);
+  expect(overlays[0]).toMatchObject({ xPos: 0, yPos: 0 });
+});
