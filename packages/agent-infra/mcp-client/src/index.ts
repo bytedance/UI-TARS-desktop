@@ -291,8 +291,6 @@ export class MCPClient<
           mcpServer.connect(serverTransport),
         ]);
 
-        this.log('info', `[MCP] Server ${name} started successfully`);
-        this.emit('server-started', { name });
       } else {
         throw new Error('No command or url provided for server');
       }
