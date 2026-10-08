@@ -1,6 +1,6 @@
 {
   "name": "@tarko/llm-client",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A TypeScript SDK to call multiple LLM Providers in OpenAI format.",
   "license": "Apache-2.0",
   "main": "dist/index.js",
