@@ -90,9 +90,13 @@ export class BrowserSearch {
       );
 
       this.logger.success('Search completed successfully');
-      const flattenedResults = results.flat().filter((v) => v !== null);
+      const flattenedResults = results
+        .flat()
+        .filter((v) => v !== null) as SearchResult[];
       this.logger.info('Search results', flattenedResults);
-      return flattenedResults as SearchResult[];
+      return options.count === undefined
+        ? flattenedResults
+        : flattenedResults.slice(0, options.count);
     } catch (error) {
       this.logger.error('Search failed:', error);
       throw error;
