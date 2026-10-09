@@ -1,0 +1,16 @@
+{
+  "name": "UI-TARS-desktop",
+  "version": "0.1.0",
+  "description": "The Open-Source Multimodal AI Agent Stack: Connecting Cutting-Edge AI Models and Agent Infra",
+  "author": {
+    "name": "bytedance",
+    "url": "https://github.com/bytedance"
+  },
+  "homepage": "https://github.com/bytedance/UI-TARS-desktop",
+  "repository": "https://github.com/bytedance/UI-TARS-desktop",
+  "keywords": [
+    "mcp",
+    "codex"
+  ],
+  "mcpServers": "./.mcp.json"
+}
