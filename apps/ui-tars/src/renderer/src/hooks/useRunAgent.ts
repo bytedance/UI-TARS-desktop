@@ -63,8 +63,10 @@ export const useRunAgent = () => {
     callback: () => void = () => {},
   ) => {
     const operator = settings.operator;
+    const needsLocalPermissions =
+      operator === Operator.LocalBrowser || operator === Operator.LocalComputer;
     if (
-      (operator === Operator.LocalBrowser || Operator.LocalComputer) &&
+      needsLocalPermissions &&
       !(ensurePermissions?.accessibility && ensurePermissions?.screenCapture)
     ) {
       const permissionsText = [

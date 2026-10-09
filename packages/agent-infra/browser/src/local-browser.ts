@@ -56,9 +56,13 @@ export class LocalBrowser extends BaseBrowser {
         '--disable-window-activation',
         '--disable-focus-on-load',
         '--no-default-browser-check', // disable default browser check
-        '--disable-web-security', // disable CORS
-        '--disable-features=IsolateOrigins,site-per-process',
-        '--disable-site-isolation-trials',
+        ...(options.disableWebSecurity
+          ? [
+              '--disable-web-security',
+              '--disable-features=IsolateOrigins,site-per-process',
+              '--disable-site-isolation-trials',
+            ]
+          : []),
         `--window-size=${viewportWidth},${viewportHeight + 90}`,
         options?.proxy ? `--proxy-server=${options.proxy}` : '',
         options?.proxyBypassList

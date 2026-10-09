@@ -8,6 +8,14 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 
+function isPathInsideOrEqual(parentPath: string, childPath: string): boolean {
+  const relative = path.relative(parentPath, childPath);
+  return (
+    relative === '' ||
+    (!!relative && !relative.startsWith('..') && !path.isAbsolute(relative))
+  );
+}
+
 /**
  * Extract session ID from referer URL
  * @param referer The referer header value
@@ -83,7 +91,7 @@ export class WorkspaceFileResolver {
     const resolvedPath = path.resolve(filePath);
     const resolvedWorkspace = path.resolve(this.baseWorkspacePath);
 
-    return resolvedPath.startsWith(resolvedWorkspace);
+    return isPathInsideOrEqual(resolvedWorkspace, resolvedPath);
   }
 
   /**
