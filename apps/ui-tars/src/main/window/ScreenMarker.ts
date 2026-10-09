@@ -206,6 +206,7 @@ class ScreenMarker {
     });
 
     const { scaleFactor = 1 } = screenshotContext;
+    const { bounds } = screen.getPrimaryDisplay();
 
     // loop predictions
     for (let i = 0; i < overlays.length; i++) {
@@ -229,9 +230,9 @@ class ScreenMarker {
           webPreferences: { nodeIntegration: true, contextIsolation: false },
           ...(overlay.xPos &&
             overlay.yPos && {
-              // logical pixels
-              x: (overlay.xPos + overlay.offsetX) * scaleFactor,
-              y: (overlay.yPos + overlay.offsetY) * scaleFactor,
+              // Convert screenshot pixels into Electron's global logical pixels.
+              x: bounds.x + overlay.xPos / scaleFactor + overlay.offsetX,
+              y: bounds.y + overlay.yPos / scaleFactor + overlay.offsetY,
             }),
         });
 
