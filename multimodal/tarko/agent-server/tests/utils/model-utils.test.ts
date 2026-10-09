@@ -76,6 +76,30 @@ describe('model-utils', () => {
       const result = getAvailableModels(config);
       expect(result).toEqual([mockModel1]);
     });
+
+    it('should keep the same model id configured under different providers', () => {
+      const openaiGpt4o: AgentModel = { provider: 'openai', id: 'gpt-4o', displayName: 'GPT-4o (OpenAI)' };
+      const azureGpt4o: AgentModel = {
+        provider: 'azure-openai',
+        id: 'gpt-4o',
+        displayName: 'GPT-4o (Azure)',
+      };
+      const config: AgentAppConfig = {
+        model: openaiGpt4o,
+        server: { models: [azureGpt4o] },
+      };
+      const result = getAvailableModels(config);
+      expect(result).toEqual([openaiGpt4o, azureGpt4o]);
+    });
+
+    it('should collapse genuine duplicates (same provider and id)', () => {
+      const config: AgentAppConfig = {
+        model: mockModel1,
+        server: { models: [{ ...mockModel1 }] },
+      };
+      const result = getAvailableModels(config);
+      expect(result).toEqual([mockModel1]);
+    });
   });
 
   describe('getDefaultModel', () => {
@@ -158,6 +182,17 @@ describe('model-utils', () => {
       const result2 = isModelConfigValid(config, 'openai', 'GPT-4');
       expect(result1).toBe(false);
       expect(result2).toBe(false);
+    });
+
+    it('should validate a model id shared across providers for each provider', () => {
+      const sharedIdConfig: AgentAppConfig = {
+        model: { provider: 'openai', id: 'gpt-4o', displayName: 'GPT-4o (OpenAI)' },
+        server: {
+          models: [{ provider: 'azure-openai', id: 'gpt-4o', displayName: 'GPT-4o (Azure)' }],
+        },
+      };
+      expect(isModelConfigValid(sharedIdConfig, 'openai', 'gpt-4o')).toBe(true);
+      expect(isModelConfigValid(sharedIdConfig, 'azure-openai', 'gpt-4o')).toBe(true);
     });
   });
 });
