@@ -262,7 +262,7 @@ export abstract class BaseBrowser implements BrowserInterface {
 
     // Get all pages and find the last active page
     const pages = await this.browser.pages();
-    this.logger.info('getActivePage: all of pages lenght:', pages.length);
+    this.logger.info('getActivePage: all of pages length:', pages.length);
 
     if (pages.length === 0) {
       this.activePage = await this.createPage();

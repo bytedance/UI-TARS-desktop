@@ -131,7 +131,7 @@ export default function Settings() {
     },
   });
   useEffect(() => {
-    if (Object.keys(settings)) {
+    if (Object.keys(settings).length > 0) {
       form.reset({
         language: settings.language,
         vlmProvider: settings.vlmProvider,
