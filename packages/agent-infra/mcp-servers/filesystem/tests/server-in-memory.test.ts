@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../src/server.js';
+import fs from 'node:fs/promises';
 import path from 'path';
 import url from 'node:url';
 
@@ -97,6 +98,78 @@ describe('MCP Server in memory', () => {
             },
           ],
         });
+      });
+
+      test('move_file should reject an existing destination', async () => {
+        const tempDir = await fs.mkdtemp(
+          path.join(__dirname, './fixtures/normal/move-file-'),
+        );
+        const sourcePath = path.join(tempDir, 'source.txt');
+        const destinationPath = path.join(tempDir, 'destination.txt');
+
+        try {
+          await fs.writeFile(sourcePath, 'SOURCE');
+          await fs.writeFile(destinationPath, 'KEEP_DESTINATION');
+
+          const result = await client.callTool({
+            name: 'move_file',
+            arguments: {
+              source: sourcePath,
+              destination: destinationPath,
+            },
+          });
+
+          expect(result).toMatchObject({
+            isError: true,
+            content: [
+              {
+                type: 'text',
+                text: expect.stringContaining('Destination already exists'),
+              },
+            ],
+          });
+          expect(await fs.readFile(sourcePath, 'utf8')).toBe('SOURCE');
+          expect(await fs.readFile(destinationPath, 'utf8')).toBe(
+            'KEEP_DESTINATION',
+          );
+        } finally {
+          await fs.rm(tempDir, { recursive: true, force: true });
+        }
+      });
+
+      test('move_file should move to a new destination', async () => {
+        const tempDir = await fs.mkdtemp(
+          path.join(__dirname, './fixtures/normal/move-file-'),
+        );
+        const sourcePath = path.join(tempDir, 'source.txt');
+        const destinationPath = path.join(tempDir, 'destination.txt');
+
+        try {
+          await fs.writeFile(sourcePath, 'SOURCE');
+
+          const result = await client.callTool({
+            name: 'move_file',
+            arguments: {
+              source: sourcePath,
+              destination: destinationPath,
+            },
+          });
+
+          expect(result).toEqual({
+            content: [
+              {
+                type: 'text',
+                text: `Successfully moved ${sourcePath} to ${destinationPath}`,
+              },
+            ],
+          });
+          expect(await fs.readFile(destinationPath, 'utf8')).toBe('SOURCE');
+          await expect(fs.access(sourcePath)).rejects.toMatchObject({
+            code: 'ENOENT',
+          });
+        } finally {
+          await fs.rm(tempDir, { recursive: true, force: true });
+        }
       });
     });
   });
