@@ -1,6 +1,6 @@
 {
   "name": "ui-tars-desktop",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "main": "./dist/main/main.js",
   "packageManager": "pnpm@9.10.0",
@@ -59,7 +59,8 @@
   "dependencies": {
     "@computer-use/node-mac-permissions": "2.2.2",
     "sharp": "0.33.3",
-    "jose": "^6.0.11"
+    "jose": "^6.0.11",
+    "escape-html": "^1.0.3"
   },
   "devDependencies": {
     "semver": "7.7.2",
@@ -86,6 +87,7 @@
     "@electron/asar": "^3.2.18",
     "@electron/fuses": "^1.8.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.1",
+    "@types/escape-html": "^1.0.4",
     "@types/node": "^20.14.8",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
