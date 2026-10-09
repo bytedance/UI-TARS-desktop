@@ -26,21 +26,18 @@ export const TerminateDialog = memo(
       <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              Terminate the current instance ?
-            </AlertDialogTitle>
+            <AlertDialogTitle>终止当前实例？</AlertDialogTitle>
             <AlertDialogDescription>
-              After termination, the current remote instance will be reclaimed,
-              and the task will be paused
+              终止后，当前远程实例将被回收，任务将暂停
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500 hover:bg-red-600"
               onClick={onConfirm}
             >
-              Terminate
+              终止
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

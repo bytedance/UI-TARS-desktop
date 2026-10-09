@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { useSetting } from '@renderer/hooks/useSetting';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 import {
   Form,
   FormControl,
@@ -34,6 +35,7 @@ const formSchema = z.object({
 
 export function ChatSettings() {
   const { settings, updateSetting } = useSetting();
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -97,13 +99,11 @@ export function ChatSettings() {
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>Language</FormLabel>
-                  <FormDescription>
-                    Control the language used in LLM conversations
-                  </FormDescription>
+                  <FormLabel>{t('chat.language')}</FormLabel>
+                  <FormDescription>{t('chat.language_desc')}</FormDescription>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select language" />
+                      <SelectValue placeholder={t('common.select_language')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="en">English</SelectItem>
@@ -121,10 +121,8 @@ export function ChatSettings() {
               // console.log('field', field);
               return (
                 <FormItem>
-                  <FormLabel>Max Loop</FormLabel>
-                  <FormDescription>
-                    Enter a number between 25-200
-                  </FormDescription>
+                  <FormLabel>{t('chat.max_loop')}</FormLabel>
+                  <FormDescription>{t('chat.max_loop_desc')}</FormDescription>
                   <FormControl>
                     <Input
                       type="number"
@@ -143,12 +141,12 @@ export function ChatSettings() {
             name="loopIntervalInMs"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Loop Wait Time (ms)</FormLabel>
-                <FormDescription>Enter a number between 0-3000</FormDescription>
+                <FormLabel>{t('chat.loop_interval')}</FormLabel>
+                <FormDescription>{t('chat.loop_desc')}</FormDescription>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter a number between 0-3000"
+                    placeholder={t('chat.loop_interval_placeholder')}
                     {...field}
                     value={field.value === 0 ? '' : field.value}
                     onChange={(e) => field.onChange(Number(e.target.value))}

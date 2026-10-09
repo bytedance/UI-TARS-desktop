@@ -31,8 +31,10 @@ import { sleep } from '@ui-tars/shared/utils';
 import { FreeTrialDialog } from '../../components/AlertDialog/freeTrialDialog';
 import { DragArea } from '../../components/Common/drag';
 import { OPERATOR_URL_MAP } from '../../const';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const Home = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { createSession } = useSession();
   const [localConfig, setLocalConfig] = useState({
@@ -46,7 +48,7 @@ const Home = () => {
 
   const toRemoteComputer = async (value: 'free' | 'paid') => {
     console.log('toRemoteComputer', value);
-    const session = await createSession('New Session', {
+    const session = await createSession(t('session.new_session'), {
       operator: Operator.RemoteComputer,
       isFree: value === 'free',
     });
@@ -77,7 +79,7 @@ const Home = () => {
   const toRemoteBrowser = async (value: 'free' | 'paid') => {
     console.log('toRemoteBrowser', value);
 
-    const session = await createSession('New Session', {
+    const session = await createSession(t('session.new_session'), {
       operator: Operator.RemoteBrowser,
       isFree: value === 'free',
     });
@@ -106,7 +108,7 @@ const Home = () => {
 
   /** local click logic start */
   const toLocal = async (operator: Operator) => {
-    const session = await createSession('New Session', {
+    const session = await createSession(t('session.new_session'), {
       operator: operator,
     });
 
@@ -159,15 +161,14 @@ const Home = () => {
       <DragArea></DragArea>
       <div className="w-full h-full flex flex-col items-center justify-center">
         <h1 className="text-2xl font-semibold mt-1 mb-8">
-          Welcome to UI-TARS Desktop
+          {t('home.welcome')}
         </h1>
         <Alert className="mb-4 w-[824px]">
           <Info className="h-4 w-4 mt-2" />
           <AlertDescription>
             <div className="flex items-center">
               <p className="text-sm text-muted-foreground">
-                You can also experience the remote versions on Volcano
-                Engine:&nbsp;
+                {t('home.experience_remote')}&nbsp;
               </p>
               <Button
                 variant="link"
@@ -179,9 +180,9 @@ const Home = () => {
                   )
                 }
               >
-                Computer Operator
+                {t('home.computer_operator')}
               </Button>
-              <span>&nbsp;and&nbsp;</span>
+              <span>&nbsp;{t('home.and')}&nbsp;</span>
               <Button
                 variant="link"
                 className="p-0 text-blue-500 hover:text-blue-600 hover:underline cursor-pointer"
@@ -192,7 +193,7 @@ const Home = () => {
                   )
                 }
               >
-                Browser Operator
+                {t('home.browser_operator')}
               </Button>
             </div>
           </AlertDescription>
@@ -200,11 +201,8 @@ const Home = () => {
         <div className="flex gap-6">
           <Card className="w-[400px] py-5">
             <CardHeader className="px-5">
-              <CardTitle>Computer Operator</CardTitle>
-              <CardDescription>
-                Use the UI-TARS model to automate and complete tasks directly on
-                your computer with AI assistance.
-              </CardDescription>
+              <CardTitle>{t('home.computer_operator')}</CardTitle>
+              <CardDescription>{t('home.computer_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="px-5">
               <img
@@ -218,17 +216,14 @@ const Home = () => {
                 onClick={() => handleLocalPress(Operator.LocalComputer)}
                 className="w-full"
               >
-                Use Local Computer
+                {t('home.use_local_computer')}
               </Button>
             </CardFooter>
           </Card>
           <Card className="w-[400px] py-5">
             <CardHeader className="px-5">
-              <CardTitle>Browser Operator</CardTitle>
-              <CardDescription>
-                Let the UI-TARS model help you automate browser tasks, from
-                navigating pages to filling out forms.
-              </CardDescription>
+              <CardTitle>{t('home.browser_operator')}</CardTitle>
+              <CardDescription>{t('home.browser_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="px-5">
               <img
@@ -242,7 +237,7 @@ const Home = () => {
                 onClick={() => handleLocalPress(Operator.LocalBrowser)}
                 className="w-full"
               >
-                Use Local Browser
+                {t('home.use_local_browser')}
               </Button>
             </CardFooter>
           </Card>

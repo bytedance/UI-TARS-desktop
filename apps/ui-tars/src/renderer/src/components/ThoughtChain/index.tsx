@@ -8,6 +8,7 @@ import { Button } from '@renderer/components/ui/button';
 import { PredictionParsed } from '@ui-tars/shared/types';
 import { ActionIconMap } from '@renderer/const/actions';
 import { Markdown } from '../markdown';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 interface ThoughtStepCardProps {
   step: PredictionParsed;
@@ -18,6 +19,7 @@ interface ThoughtStepCardProps {
 
 function ThoughtStepCard({ step, onClick, hasSomImage }: ThoughtStepCardProps) {
   const ActionIcon = ActionIconMap[step?.action_type] || MousePointerClick;
+  const { t } = useTranslation();
 
   return (
     <>
@@ -31,10 +33,10 @@ function ThoughtStepCard({ step, onClick, hasSomImage }: ThoughtStepCardProps) {
         >
           <ActionIcon className="h-4 w-4" />
           {step.action_type === 'call_user' ? (
-            'Waiting for user to take control'
+            t('run.waiting_user')
           ) : (
             <>
-              Action:
+              {t('run.action')}:
               <span className="text-gray-600 max-w-50 truncate">
                 {step.action_type}
                 {step.action_inputs?.start_box &&

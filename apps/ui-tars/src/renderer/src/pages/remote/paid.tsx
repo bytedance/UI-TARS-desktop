@@ -71,9 +71,7 @@ const RemoteOperator = () => {
     from: state.from,
   });
   const TabName =
-    state.operator === Operator.RemoteComputer
-      ? 'Cloud Computer'
-      : 'Cloud Browser';
+    state.operator === Operator.RemoteComputer ? '云电脑' : '云浏览器';
   const [disabled, setDisabled] = useState(true);
   const [pendingAction, setPendingAction] = useState<'newChat' | 'back' | null>(
     null,
@@ -169,7 +167,7 @@ const RemoteOperator = () => {
     agentStatus === StatusEnum.PAUSE;
 
   const onNewChat = useCallback(async () => {
-    const session = await createSession('New Session', {
+    const session = await createSession('新建会话', {
       operator: state.operator,
     });
 
@@ -272,7 +270,7 @@ const RemoteOperator = () => {
             );
           })}
 
-          {thinking && <LoadingText text={'Thinking...'} />}
+          {thinking && <LoadingText text={'思考中...'} />}
           {errorMsg && <ErrorMessage text={errorMsg} />}
         </div>
       </ScrollArea>
@@ -294,7 +292,7 @@ const RemoteOperator = () => {
           disabled={disabled}
           onClick={() => onTerminateOpenChange(true)}
         >
-          Terminate
+          终止
         </Button>
       </NavHeader>
       <div className="px-5 pb-5 flex flex-1 gap-5">
@@ -311,7 +309,7 @@ const RemoteOperator = () => {
               onClick={handleNewChat}
             >
               <MessageCirclePlus />
-              New Chat
+              新建会话
             </Button>
           </div>
           {renderChatList()}
@@ -329,7 +327,7 @@ const RemoteOperator = () => {
           >
             <TabsList>
               <TabsTrigger value="vnc">{TabName}</TabsTrigger>
-              <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
+              <TabsTrigger value="screenshot">屏幕截图</TabsTrigger>
             </TabsList>
             {/* The `children` inside `TabsContent` are destroyed when switching
                 tabs. However, if an iframe is destroyed, the WebSocket (WSS)

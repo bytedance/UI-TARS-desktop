@@ -12,6 +12,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@renderer/components/ui/alert';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 import { Markdown } from '../markdown';
 
 export const HumanTextMessage = ({ text }: { text: string }) => {
@@ -37,6 +38,7 @@ interface ScreenshotMessageProps {
 }
 
 export const ScreenshotMessage = ({ onClick }: ScreenshotMessageProps) => {
+  const { t } = useTranslation();
   return (
     <Button
       variant="outline"
@@ -45,7 +47,7 @@ export const ScreenshotMessage = ({ onClick }: ScreenshotMessageProps) => {
       onClick={onClick}
     >
       <Camera className="w-4 h-4" />
-      <span>Screenshot</span>
+      <span>{t('run.screenshot')}</span>
     </Button>
   );
 };
