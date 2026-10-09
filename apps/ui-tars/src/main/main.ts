@@ -30,6 +30,7 @@ import { registerSettingsHandlers } from './services/settings';
 import { sanitizeState } from './utils/sanitizeState';
 import { windowManager } from './services/windowManager';
 import { checkBrowserAvailability } from './services/browserCheck';
+import { scheduledTaskService } from './services/scheduledTasks';
 
 const { isProd } = env;
 
@@ -57,12 +58,8 @@ const loadDevDebugTools = async () => {
   });
 
   import('electron-devtools-installer')
-    .then(({ default: installExtensionDefault, REACT_DEVELOPER_TOOLS }) => {
-      // @ts-ignore
-      const installExtension = installExtensionDefault?.default;
-      const extensions = [installExtension(REACT_DEVELOPER_TOOLS)];
-
-      return Promise.all(extensions)
+    .then(({ default: installExtension, REACT_DEVELOPER_TOOLS }) => {
+      return Promise.all([installExtension(REACT_DEVELOPER_TOOLS)])
         .then((names) => logger.info('Added Extensions:', names.join(', ')))
         .catch((err) =>
           logger.error('An error occurred adding extension:', err),
@@ -147,6 +144,7 @@ const initializeApp = async () => {
   });
 
   logger.info('initializeApp end');
+  scheduledTaskService.start();
 
   // Check and update remote presets
   const settings = SettingStore.getStore();

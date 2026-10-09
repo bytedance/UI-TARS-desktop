@@ -4,7 +4,7 @@
  */
 import { useCallback, useState, type ComponentProps } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Home } from 'lucide-react';
+import { CalendarClock, Home } from 'lucide-react';
 
 import {
   Sidebar,
@@ -42,7 +42,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const { status } = useStore();
   const [isNavDialogOpen, setNavDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
-    'home' | { type: 'session'; id: string } | null
+    'home' | 'scheduledTasks' | { type: 'session'; id: string } | null
   >(null);
 
   const needsConfirm =
@@ -52,6 +52,11 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
 
   const goHome = useCallback(async () => {
     await navigate('/');
+    await setActiveSession('');
+  }, [navigate, setActiveSession]);
+
+  const goScheduledTasks = useCallback(async () => {
+    await navigate('/scheduled-tasks');
     await setActiveSession('');
   }, [navigate, setActiveSession]);
 
@@ -98,6 +103,15 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     }
   }, [needsConfirm]);
 
+  const handleScheduledTasksClick = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('scheduledTasks');
+      setNavDialogOpen(true);
+    } else {
+      goScheduledTasks();
+    }
+  }, [needsConfirm, goScheduledTasks]);
+
   const handleSessionClick = useCallback(
     (sessionId: string) => {
       if (needsConfirm) {
@@ -116,12 +130,14 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
 
     if (pendingAction === 'home') {
       await goHome();
+    } else if (pendingAction === 'scheduledTasks') {
+      await goScheduledTasks();
     } else if (pendingAction?.type === 'session') {
       await onSessionClick(pendingAction.id);
     }
     setPendingAction(null);
     setNavDialogOpen(false);
-  }, [pendingAction, goHome, onSessionClick]);
+  }, [pendingAction, goHome, goScheduledTasks, onSessionClick]);
 
   const onCancel = useCallback(() => {
     setPendingAction(null);
@@ -151,6 +167,13 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             >
               <Home />
               Home
+            </SidebarMenuButton>
+            <SidebarMenuButton
+              className="font-medium"
+              onClick={handleScheduledTasksClick}
+            >
+              <CalendarClock />
+              Scheduled Tasks
             </SidebarMenuButton>
           </SidebarMenu>
         </SidebarHeader>
