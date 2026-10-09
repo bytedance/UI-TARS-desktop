@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { pathToFileURL } from 'node:url';
+
 import {
   AgentImplementation,
   isAgentImplementationType,
@@ -51,8 +53,10 @@ export async function resolveAgentImplementation(
       // When workspace is provided, it will be used as the base path for relative imports
       const resolvedPath = require.resolve(agentModulePathIdentifier, resolveOptions);
 
-      // Use the resolved absolute path for import to ensure consistency
-      const agentModule = await import(resolvedPath);
+      // Use the resolved absolute path for import to ensure consistency.
+      // `require.resolve()` returns a native path, which the ESM loader rejects
+      // on Windows (`Received protocol 'c:'`), so import it as a file URL.
+      const agentModule = await import(pathToFileURL(resolvedPath).href);
 
       // Handle nested default exports (common in transpiled modules)
       let agentConstructor = agentModule.default as AgentConstructor;
