@@ -313,11 +313,19 @@ export default config;
     const execPromise = promisify(exec);
     try {
       await execPromise('code --version');
-      exec(`code "${workspacePath}"`, (error) => {
-        if (error) {
-          console.error(`Failed to open workspace: ${error.message}`);
-        }
+
+      const child = spawn('code', [workspacePath], {
+        detached: true,
+        stdio: 'ignore',
+        shell: process.platform === 'win32',
       });
+
+      child.unref();
+
+      child.on('error', (error) => {
+        console.error('Failed to open workspace:', error.message);
+      });
+
       console.log(`Opening workspace at ${workspacePath}`);
     } catch (error) {
       console.warn('VSCode not found. Please install VSCode or manually open the workspace:');
