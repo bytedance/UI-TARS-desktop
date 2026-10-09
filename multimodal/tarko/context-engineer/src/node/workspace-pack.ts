@@ -284,7 +284,9 @@ export class WorkspacePack {
     const filesByProcessedPath = new Map<string, FileInfo[]>();
 
     for (const processedPath of processedPaths) {
-      const pathFiles = files.filter((file) => file.absolutePath.startsWith(processedPath));
+      const pathFiles = files.filter((file) =>
+        this.isWithinPath(file.absolutePath, processedPath),
+      );
       filesByProcessedPath.set(processedPath, pathFiles);
     }
 
@@ -325,6 +327,20 @@ export class WorkspacePack {
     }
 
     return sections.join('\n');
+  }
+
+  /**
+   * Check whether `filePath` is `rootPath` itself or located inside it.
+   * The separator boundary keeps `/workspace/pkg/a` from matching its sibling `/workspace/pkg/ab`.
+   */
+  private isWithinPath(filePath: string, rootPath: string): boolean {
+    if (filePath === rootPath) {
+      return true;
+    }
+
+    const rootPrefix = rootPath.endsWith(path.sep) ? rootPath : `${rootPath}${path.sep}`;
+
+    return filePath.startsWith(rootPrefix);
   }
 
   /**
