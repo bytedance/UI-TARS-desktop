@@ -300,6 +300,7 @@ export class LLMProcessor {
     let hasReceivedFirstContent = false;
     let lastReasoningContentLength = 0;
     let reasoningCompleted = false;
+    let hasStreamedContent = false;
 
     this.logger.info(`llm stream start`);
 
@@ -383,6 +384,7 @@ export class LLMProcessor {
 
         // Only send content chunk if it contains actual content
         if (chunkResult.content) {
+          hasStreamedContent = true;
           // Create content streaming event with only the incremental content
           const messageEvent = this.eventStream.createEvent('assistant_streaming_message', {
             content: chunkResult.content, // Only send the incremental content, not accumulated
@@ -415,6 +417,18 @@ export class LLMProcessor {
     if (abortSignal?.aborted) {
       this.logger.info(`[LLM] Streaming response processing aborted after chunks`);
       return;
+    }
+
+    // Send a final streaming message with isComplete: true if content was streamed
+    // but the last content chunk didn't have finishReason set yet (common with OpenAI
+    // where finish_reason arrives in a separate content-less chunk)
+    if (streamingMode && hasStreamedContent && processingState.finishReason) {
+      const finalStreamingEvent = this.eventStream.createEvent('assistant_streaming_message', {
+        content: '',
+        isComplete: true,
+        messageId: messageId,
+      });
+      this.eventStream.sendEvent(finalStreamingEvent);
     }
 
     // Finalize the stream processing
