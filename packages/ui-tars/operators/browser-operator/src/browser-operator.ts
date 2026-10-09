@@ -531,7 +531,8 @@ export class BrowserOperator extends Operator {
     const page = await this.getActivePage();
 
     const { direction } = inputs;
-    const scrollAmount = 500;
+    const scrollAmount =
+      inputs.amount !== undefined ? Number(inputs.amount) || 500 : 500;
 
     this.logger.info(`Scrolling ${direction} by ${scrollAmount}px`);
 
@@ -541,6 +542,12 @@ export class BrowserOperator extends Operator {
         break;
       case 'down':
         await page.mouse.wheel({ deltaY: scrollAmount });
+        break;
+      case 'left':
+        await page.mouse.wheel({ deltaX: -scrollAmount });
+        break;
+      case 'right':
+        await page.mouse.wheel({ deltaX: scrollAmount });
         break;
       default:
         this.logger.warn(`Unsupported scroll direction: ${direction}`);
