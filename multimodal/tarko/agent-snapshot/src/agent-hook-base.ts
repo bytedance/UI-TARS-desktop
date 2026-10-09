@@ -70,7 +70,15 @@ export abstract class AgentHookBase {
   hookAgent(): boolean {
     if (this.isHooked) return false;
 
-    // Store original hooks
+    this.storeOriginalHooks();
+    this.installNewHooks();
+
+    this.isHooked = true;
+    logger.info(`Hooked into agent: ${this.snapshotName}`);
+    return true;
+  }
+
+  private storeOriginalHooks(): void {
     this.originalRequestHook = this.agent.onLLMRequest;
     this.originalResponseHook = this.agent.onLLMResponse;
     this.originalStreamingResponseHook = this.agent.onLLMStreamingResponse;
@@ -80,8 +88,9 @@ export abstract class AgentHookBase {
     this.originalAfterToolCallHook = this.agent.onAfterToolCall;
     this.originalToolCallErrorHook = this.agent.onToolCallError;
     this.originalProcessToolCallsHook = this.agent.onProcessToolCalls;
+  }
 
-    // Replace with our hooks
+  private installNewHooks(): void {
     this.agent.onLLMRequest = (id, payload) =>
       this.safeExecuteHook(() => this.onLLMRequest(id, payload));
     this.agent.onLLMResponse = (id, payload) =>
@@ -99,59 +108,38 @@ export abstract class AgentHookBase {
       this.safeExecuteHook(() => this.onToolCallError(id, toolCall, error));
     this.agent.onProcessToolCalls = (id, toolCalls) =>
       this.safeExecuteHook(() => this.onProcessToolCalls(id, toolCalls));
-
-    this.isHooked = true;
-    logger.info(`Hooked into agent: ${this.snapshotName}`);
-    return true;
   }
 
   /**
    * Unhook from the agent, restoring original hooks
-   * @param force If true, force unhooking even if isHooked is false
    */
   unhookAgent(force = false): boolean {
     if (!this.isHooked && !force) return false;
 
-    // Restore original hooks
-    if (this.originalRequestHook) {
-      this.agent.onLLMRequest = this.originalRequestHook;
-    }
-
-    if (this.originalResponseHook) {
-      this.agent.onLLMResponse = this.originalResponseHook;
-    }
-
-    if (this.originalStreamingResponseHook) {
-      this.agent.onLLMStreamingResponse = this.originalStreamingResponseHook;
-    }
-
-    if (this.originalLoopEndHook) {
-      this.agent.onAgentLoopEnd = this.originalLoopEndHook;
-    }
-
-    if (this.originalEachLoopStartHook) {
-      this.agent.onEachAgentLoopStart = this.originalEachLoopStartHook;
-    }
-
-    if (this.originalBeforeToolCallHook) {
-      this.agent.onBeforeToolCall = this.originalBeforeToolCallHook;
-    }
-
-    if (this.originalAfterToolCallHook) {
-      this.agent.onAfterToolCall = this.originalAfterToolCallHook;
-    }
-
-    if (this.originalToolCallErrorHook) {
-      this.agent.onToolCallError = this.originalToolCallErrorHook;
-    }
-
-    if (this.originalProcessToolCallsHook) {
-      this.agent.onProcessToolCalls = this.originalProcessToolCallsHook;
-    }
-
+    this.restoreOriginalHooks();
     this.isHooked = false;
     logger.info(`Unhooked from agent: ${this.snapshotName}`);
     return true;
+  }
+
+  private restoreOriginalHooks(): void {
+    const hooks = [
+      { original: this.originalRequestHook, target: 'onLLMRequest' },
+      { original: this.originalResponseHook, target: 'onLLMResponse' },
+      { original: this.originalStreamingResponseHook, target: 'onLLMStreamingResponse' },
+      { original: this.originalLoopEndHook, target: 'onAgentLoopEnd' },
+      { original: this.originalEachLoopStartHook, target: 'onEachAgentLoopStart' },
+      { original: this.originalBeforeToolCallHook, target: 'onBeforeToolCall' },
+      { original: this.originalAfterToolCallHook, target: 'onAfterToolCall' },
+      { original: this.originalToolCallErrorHook, target: 'onToolCallError' },
+      { original: this.originalProcessToolCallsHook, target: 'onProcessToolCalls' },
+    ] as const;
+
+    hooks.forEach(({ original, target }) => {
+      if (original) {
+        (this.agent as any)[target] = original;
+      }
+    });
   }
 
   /**
@@ -159,22 +147,10 @@ export abstract class AgentHookBase {
    */
   protected async safeExecuteHook<T>(hookFn: () => T | Promise<T>) {
     try {
-      const result = await hookFn();
-
-      // Handle both synchronous and asynchronous results
-      if (result instanceof Promise) {
-        return result.catch((error) => {
-          this.lastError = error;
-          logger.error(`Hook execution error: ${error.message}`);
-          throw error; // Re-throw to propagate
-        });
-      }
-
-      return result;
+      return await hookFn();
     } catch (error) {
       this.lastError = error as Error;
       logger.error(`Hook execution error: ${(error as Error).message}`);
-      // do not throw it.
     }
   }
 
@@ -203,13 +179,11 @@ export abstract class AgentHookBase {
    * Write streaming chunks to a file
    */
   protected writeStreamingChunks(filePath: string, chunks: ChatCompletionChunk[]): void {
-    // Skip if no chunks
     if (!chunks || chunks.length === 0) {
       return;
     }
 
     try {
-      // Format each chunk as a JSON line
       const chunksAsJsonLines = chunks.map((chunk) => JSON.stringify(chunk)).join('\n');
       fs.writeFileSync(filePath, chunksAsJsonLines, 'utf-8');
       logger.debug(`${chunks.length} chunks written to ${filePath}`);

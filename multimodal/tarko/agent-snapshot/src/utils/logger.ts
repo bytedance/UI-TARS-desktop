@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsoleLogger } from '@agent-infra/logger';
+import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 
 export const logger = new ConsoleLogger('[AgentSnapshot]');
+logger.setLevel(LogLevel.SILENT);

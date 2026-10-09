@@ -11,3 +11,4 @@ export * from './agent-replay-snapshot-hook';
 export * from './agent-hook-base';
 export * from './types';
 export * from './utils/snapshot-normalizer';
+export * from './utils/tool-call-tracker';

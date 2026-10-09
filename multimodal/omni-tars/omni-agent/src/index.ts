@@ -199,7 +199,7 @@ export default class OmniTARSAgent extends ComposableAgent {
           'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center',
       },
     ],
-    workspace: {
+    z``: {
       navItems: [
         {
           title: 'Code Server',
