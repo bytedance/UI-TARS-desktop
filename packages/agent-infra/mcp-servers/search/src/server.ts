@@ -42,6 +42,7 @@ export function setSearchConfig(config: Partial<SearchSettings>) {
 const API_KEY_ENV_MAP = {
   [SearchProvider.BingSearch]: process.env.BING_SEARCH_API_KEY,
   [SearchProvider.Tavily]: process.env.TAVILY_API_KEY,
+  [SearchProvider.Firecrawl]: process.env.FIRECRAWL_API_KEY,
   [SearchProvider.BrowserSearch]: undefined,
   [SearchProvider.SearXNG]: undefined,
   [SearchProvider.DuckduckgoSearch]: undefined,
@@ -50,6 +51,7 @@ const API_KEY_ENV_MAP = {
 const API_BASE_URL_ENV_MAP = {
   [SearchProvider.BingSearch]: process.env.BING_SEARCH_API_BASE_URL,
   [SearchProvider.Tavily]: undefined,
+  [SearchProvider.Firecrawl]: process.env.FIRECRAWL_API_BASE_URL,
   [SearchProvider.BrowserSearch]: undefined,
   [SearchProvider.SearXNG]: undefined,
   [SearchProvider.DuckduckgoSearch]: undefined,

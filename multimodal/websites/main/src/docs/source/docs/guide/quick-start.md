@@ -107,13 +107,14 @@ For search config, you can set the search provider:
 
 The comparison of search providers is as follows:
 
-| Search Provider                | Need API Key? | Speed       |
-| ------------------------------ | ------------- | ----------- |
-| Local Browser Search (Default) | NO            | Slow        |
-| Tavily                         | YES           | Fast        |
-| Bing Search                    | YES           | Fast        |
-| SearXNG Search                 | NO            | ❓Unknown   |
-| Duckduckgo Search              | NO            | ⚠️ Unstable |
+| Search Provider                | Need API Key?           | Speed       |
+| ------------------------------ | ----------------------- | ----------- |
+| Local Browser Search (Default) | NO                      | Slow        |
+| Tavily                         | YES                     | Fast        |
+| Bing Search                    | YES                     | Fast        |
+| Firecrawl                      | Optional (keyless tier) | Fast        |
+| SearXNG Search                 | NO                      | ❓Unknown   |
+| Duckduckgo Search              | NO                      | ⚠️ Unstable |
 
 ---
 
@@ -124,6 +125,19 @@ You can click **Test Search Service** button to check if current search setting 
 <p align="center">
   <img width="800" src="https://sf16-sg.tiktokcdn.com/obj/eden-sg/psvhouloj/agent-tars-docs/agent-tars-setting-test-search-service.png">
 </p>
+
+---
+
+---
+
+### Config Web Fetch
+
+Beyond search, Firecrawl also provides a standalone `web_fetch` tool that reads any URL as clean, LLM-ready markdown (including JavaScript-rendered pages and PDFs), without opening the browser. It is configured independently of search via the top-level `fetch` option, so you can pair it with any search provider or enable it on its own.
+
+| Option          | Description                                            |
+| --------------- | ------------------------------------------------------ |
+| `fetch.apiKey`  | Optional Firecrawl key (keyless free tier also works). |
+| `fetch.baseUrl` | Optional. Point at a self-hosted Firecrawl instance.   |
 
 ---
 

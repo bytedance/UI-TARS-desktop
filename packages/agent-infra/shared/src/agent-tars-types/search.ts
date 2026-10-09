@@ -22,6 +22,11 @@ export enum SearchProvider {
    * SearXNG Search API
    */
   SearXNG = 'searxng',
+  /**
+   * Firecrawl Search API — web search that returns full-page,
+   * LLM-ready content (markdown) for every result in a single call.
+   */
+  Firecrawl = 'firecrawl',
 }
 
 export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';
