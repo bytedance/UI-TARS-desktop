@@ -127,7 +127,7 @@ export async function loadConfig<T extends Record<string, any> = Record<string, 
     try {
       const { default: yaml } = await import('js-yaml');
       const content = await fs.promises.readFile(configFilePath, 'utf-8');
-      configExport = yaml.load(content);
+      configExport = yaml.load(content, { schema: yaml.DEFAULT_SAFE_SCHEMA });
     } catch (err) {
       console.error(`Failed to load YAML file: ${configFilePath}`);
       throw err;

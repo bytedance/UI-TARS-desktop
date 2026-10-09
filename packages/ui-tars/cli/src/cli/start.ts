@@ -37,7 +37,7 @@ export const start = async (options: CliOptions) => {
     }
 
     const yamlText = await response.text();
-    const preset = yaml.load(yamlText) as any;
+    const preset = yaml.load(yamlText, { schema: yaml.DEFAULT_SAFE_SCHEMA }) as any;
 
     config.apiKey = preset?.vlmApiKey;
     config.baseURL = preset?.vlmBaseUrl;
