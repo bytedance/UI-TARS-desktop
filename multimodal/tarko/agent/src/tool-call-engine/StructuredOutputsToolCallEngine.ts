@@ -24,6 +24,161 @@ import { getLogger } from '@tarko/shared-utils';
 import { buildToolCallResultMessages } from './utils';
 import { jsonrepair } from 'jsonrepair';
 
+type ScannedJsonString =
+  | { status: 'complete'; value: string; end: number }
+  | { status: 'partial'; value: string; end: number }
+  | { status: 'invalid'; value: string; end: number };
+
+const SIMPLE_ESCAPES: Record<string, string> = {
+  '"': '"',
+  '\\': '\\',
+  '/': '/',
+  b: '\b',
+  f: '\f',
+  n: '\n',
+  r: '\r',
+  t: '\t',
+};
+
+/**
+ * Scans a JSON string without repairing it. For an incomplete string, only
+ * characters whose representation is complete are returned. In particular,
+ * escape sequences and surrogate pairs are held until their remaining input
+ * arrives in a later stream chunk.
+ */
+function scanJsonString(text: string, start: number): ScannedJsonString {
+  let value = '';
+  let index = start + 1;
+
+  while (index < text.length) {
+    const character = text[index];
+
+    if (character === '"') {
+      return { status: 'complete', value, end: index + 1 };
+    }
+
+    if (character === '\\') {
+      if (index + 1 >= text.length) {
+        return { status: 'partial', value, end: text.length };
+      }
+
+      const escape = text[index + 1];
+      if (escape !== 'u') {
+        const decoded = SIMPLE_ESCAPES[escape];
+        if (decoded === undefined) {
+          return { status: 'invalid', value, end: index };
+        }
+        value += decoded;
+        index += 2;
+        continue;
+      }
+
+      const hex = text.slice(index + 2, index + 6);
+      if (hex.length < 4) {
+        return { status: 'partial', value, end: text.length };
+      }
+      if (!/^[0-9a-fA-F]{4}$/.test(hex)) {
+        return { status: 'invalid', value, end: index };
+      }
+
+      const codeUnit = Number.parseInt(hex, 16);
+      if (codeUnit >= 0xd800 && codeUnit <= 0xdbff) {
+        const lowSurrogateStart = index + 6;
+        const remaining = text.slice(lowSurrogateStart);
+
+        if (
+          remaining.length === 0 ||
+          remaining === '\\' ||
+          remaining === '\\u' ||
+          (remaining.startsWith('\\u') && remaining.length < 6)
+        ) {
+          return { status: 'partial', value, end: text.length };
+        }
+
+        if (text.slice(lowSurrogateStart, lowSurrogateStart + 2) === '\\u') {
+          const lowHex = text.slice(lowSurrogateStart + 2, lowSurrogateStart + 6);
+          if (/^[0-9a-fA-F]{4}$/.test(lowHex)) {
+            const lowCodeUnit = Number.parseInt(lowHex, 16);
+            if (lowCodeUnit >= 0xdc00 && lowCodeUnit <= 0xdfff) {
+              value += String.fromCharCode(codeUnit, lowCodeUnit);
+              index = lowSurrogateStart + 6;
+              continue;
+            }
+          }
+        }
+      }
+
+      value += String.fromCharCode(codeUnit);
+      index += 6;
+      continue;
+    }
+
+    if (character.charCodeAt(0) < 0x20) {
+      return { status: 'invalid', value, end: index };
+    }
+
+    const codeUnit = character.charCodeAt(0);
+    if (codeUnit >= 0xd800 && codeUnit <= 0xdbff && index + 1 === text.length) {
+      return { status: 'partial', value, end: text.length };
+    }
+
+    value += character;
+    index += 1;
+  }
+
+  return { status: 'partial', value, end: text.length };
+}
+
+/**
+ * Extracts only a top-level `content` string from a possibly incomplete JSON
+ * object. Nested keys and string-like text are ignored.
+ */
+function scanTopLevelContent(text: string): string | undefined {
+  let index = 0;
+  while (/\s/.test(text[index] || '')) index += 1;
+  if (text[index] !== '{') return undefined;
+
+  let depth = 1;
+  index += 1;
+
+  while (index < text.length && depth > 0) {
+    const character = text[index];
+
+    if (character === '"') {
+      const token = scanJsonString(text, index);
+      if (token.status !== 'complete') return undefined;
+
+      if (depth === 1) {
+        let separator = token.end;
+        while (/\s/.test(text[separator] || '')) separator += 1;
+
+        if (text[separator] === ':') {
+          let valueStart = separator + 1;
+          while (/\s/.test(text[valueStart] || '')) valueStart += 1;
+
+          if (token.value === 'content') {
+            if (text[valueStart] !== '"') return undefined;
+            const content = scanJsonString(text, valueStart);
+            return content.status === 'invalid' ? undefined : content.value;
+          }
+
+          index = valueStart;
+          continue;
+        }
+      }
+
+      index = token.end;
+      continue;
+    }
+
+    if (character === '{' || character === '[') depth += 1;
+    if (character === '}' || character === ']') depth -= 1;
+    index += 1;
+  }
+
+  return undefined;
+}
+
 /**
  * StructuredOutputsToolCallEngine - Uses structured outputs (JSON Schema) for tool calls
  *
@@ -195,45 +350,21 @@ ${structuredOutputInstructions}`;
 
       // Try to extract content from JSON as it comes in
       if (this.mightBeCollectingJson(state.contentBuffer)) {
-        try {
-          // Try to repair and parse the potentially incomplete JSON
-          const repairedJson = jsonrepair(state.contentBuffer);
-          const parsed = JSON.parse(repairedJson);
+        const scannedContent = scanTopLevelContent(state.contentBuffer);
 
-          // If we have a valid JSON with content field
-          if (parsed && typeof parsed.content === 'string') {
-            // Calculate only the new incremental content
-            const newExtractedContent = parsed.content.slice(state.lastParsedContent?.length || 0);
+        if (
+          scannedContent !== undefined &&
+          scannedContent.startsWith(state.lastParsedContent || '')
+        ) {
+          content = scannedContent.slice(state.lastParsedContent?.length || 0);
+          state.lastParsedContent = scannedContent;
+        }
 
-            // Only send if we have new incremental content
-            if (newExtractedContent) {
-              content = newExtractedContent;
-              // Update the last parsed content to the full content
-              state.lastParsedContent = parsed.content;
-            }
-
-            // Check for tool call
-            if (parsed.toolCall && !hasToolCallUpdate) {
-              const { name, args } = parsed.toolCall;
-
-              // Create a tool call and update state
-              const toolCall: ChatCompletionMessageToolCall = {
-                id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-                type: 'function',
-                function: {
-                  name,
-                  arguments: JSON.stringify(args),
-                },
-              };
-
-              state.toolCalls = [toolCall];
-              hasToolCallUpdate = true;
-            }
-          }
-        } catch (e) {
-          // JSON parsing failed - this is expected for incomplete JSON
-          // Don't send any content in this case
-          content = '';
+        // Never build a tool call from repaired/incomplete JSON.
+        const toolCall = this.parseCompleteToolCall(state.contentBuffer);
+        if (toolCall && state.toolCalls.length === 0) {
+          state.toolCalls = [toolCall];
+          hasToolCallUpdate = true;
         }
       } else {
         // If not collecting JSON, pass through the content directly
@@ -253,49 +384,32 @@ ${structuredOutputInstructions}`;
    * Finalize the stream processing and extract the final response
    */
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+    const rawContent = state.contentBuffer;
+    let finalContent = this.mightBeCollectingJson(rawContent)
+      ? state.lastParsedContent || ''
+      : rawContent;
+
     // One final attempt to parse JSON
     try {
-      const repairedJson = jsonrepair(state.contentBuffer);
+      const repairedJson = jsonrepair(rawContent);
       const parsed = JSON.parse(repairedJson);
 
-      if (parsed) {
-        if (parsed.toolCall) {
-          // Found a tool call in the JSON
-          const { name, args } = parsed.toolCall;
-
-          // Create a tool call
-          const toolCall: ChatCompletionMessageToolCall = {
-            id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-            type: 'function',
-            function: {
-              name,
-              arguments: JSON.stringify(args),
-            },
-          };
-
-          state.toolCalls = [toolCall];
-
-          // For JSON-based responses, return only the content field
-          if (parsed.content) {
-            state.contentBuffer = parsed.content;
-          } else {
-            state.contentBuffer = '';
-          }
-        } else if (parsed.content) {
-          // No tool call, just content
-          state.contentBuffer = parsed.content;
-        }
+      if (parsed && typeof parsed.content === 'string') {
+        finalContent = parsed.content;
       }
     } catch (e) {
       this.logger.warn(`Failed to parse JSON in final processing: ${e}`);
     }
 
+    const toolCall = this.parseCompleteToolCall(rawContent);
+    state.toolCalls = toolCall ? [toolCall] : [];
+
     const finishReason: FinishReason =
       state.toolCalls.length > 0 ? 'tool_calls' : state.finishReason || 'stop';
 
     return {
-      content: state.contentBuffer,
-      rawContent: state.contentBuffer,
+      content: finalContent,
+      rawContent,
       reasoningContent: state.reasoningBuffer || undefined,
       toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
       finishReason,
@@ -306,8 +420,42 @@ ${structuredOutputInstructions}`;
    * Check if the text might be in the process of building a JSON object
    */
   private mightBeCollectingJson(text: string): boolean {
-    // If it contains an opening brace but not a balancing number of closing braces
-    return text.includes('{');
+    return text.trimStart().startsWith('{');
+  }
+
+  /**
+   * Tool calls are accepted only from syntactically complete, unmodified JSON.
+   * This prevents jsonrepair from turning a truncated tool call into an
+   * executable one.
+   */
+  private parseCompleteToolCall(text: string): ChatCompletionMessageToolCall | undefined {
+    try {
+      const parsed = JSON.parse(text);
+      const toolCall = parsed?.toolCall;
+
+      if (
+        !toolCall ||
+        typeof toolCall !== 'object' ||
+        typeof toolCall.name !== 'string' ||
+        toolCall.name.length === 0 ||
+        !toolCall.args ||
+        typeof toolCall.args !== 'object' ||
+        Array.isArray(toolCall.args)
+      ) {
+        return undefined;
+      }
+
+      return {
+        id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        type: 'function',
+        function: {
+          name: toolCall.name,
+          arguments: JSON.stringify(toolCall.args),
+        },
+      };
+    } catch {
+      return undefined;
+    }
   }
 
   /**
