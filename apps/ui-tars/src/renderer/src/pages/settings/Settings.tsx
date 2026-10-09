@@ -171,8 +171,6 @@ export default function Settings() {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('onSubmit', values);
-
     updateSetting(values);
     // toast.success('Settings saved successfully');
     // await api.closeSettingsWindow();

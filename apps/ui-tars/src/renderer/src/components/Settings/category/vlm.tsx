@@ -241,8 +241,6 @@ export function VLMSettings({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('onSubmit', values);
-
     updateSetting({ ...settings, ...values });
     toast.success('Settings saved successfully');
   };
@@ -519,7 +517,9 @@ export function ModelAvailabilityCheck({
           message: successMessage,
           responseApiSupported,
         });
-        console.log('[VLM Model Check] Success:', modelConfig, {
+        console.log('[VLM Model Check] Success:', {
+          baseUrl,
+          modelName,
           responseApiSupported,
         });
       } else {
@@ -529,7 +529,10 @@ export function ModelAvailabilityCheck({
           message: errorMessage,
           responseApiSupported,
         });
-        console.error('[VLM Model Check] Model not responding:', modelConfig);
+        console.error('[VLM Model Check] Model not responding:', {
+          baseUrl,
+          modelName,
+        });
       }
     } catch (error) {
       const errorMessage =

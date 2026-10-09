@@ -117,9 +117,7 @@ export function RemoteComputerSettings({
     form,
   ]);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('onSubmit', values);
-
+  const onSubmit = async () => {
     // updateSetting({ ...settings, ...values });
     toast.success('Settings saved successfully');
   };
@@ -129,7 +127,7 @@ export function RemoteComputerSettings({
       return new Promise<z.infer<typeof formSchema>>((resolve, reject) => {
         form.handleSubmit(
           (values) => {
-            onSubmit(values);
+            onSubmit();
             resolve(values);
           },
           (errors) => {
