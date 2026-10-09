@@ -136,6 +136,12 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
               : '';
         case 'run_command':
           return args.command || (status === 'constructing' ? 'preparing command...' : '');
+        case 'search_files':
+          return args.pattern
+            ? `${args.pattern}${args.path ? ` in ${args.path}` : ''}`
+            : status === 'constructing'
+              ? 'preparing search...'
+              : '';
         case 'read_file':
         case 'write_file':
         case 'edit_file':
@@ -201,6 +207,8 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
         return 'Web Search';
       case 'list_directory':
         return 'List Files';
+      case 'search_files':
+        return 'Search Files';
       case 'run_command':
         return 'Run Command';
       case 'read_file':
@@ -223,6 +231,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
       'write_file',
       'edit_file',
       'list_directory',
+      'search_files',
       'str_replace_editor',
     ];
     return fileTools.includes(toolName);
