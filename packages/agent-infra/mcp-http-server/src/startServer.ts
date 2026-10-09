@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import express, { NextFunction, Request, Response } from 'express';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, timingSafeEqual } from 'node:crypto';
 import {
   ErrorCode,
   isInitializeRequest,
@@ -54,7 +54,91 @@ interface StartSseAndStreamableHttpMcpServerParams {
   /** Routes configuration */
   routes?: RoutesConfig;
   logger?: Logger;
+  /**
+   * API key used for Bearer token authentication.
+   *
+   * When provided (or when the `MCP_API_KEY` environment variable is set),
+   * every incoming request must include a matching
+   * `Authorization: Bearer <apiKey>` header, otherwise it is rejected with
+   * a `401 Unauthorized` response.
+   *
+   * When omitted, the server keeps its previous unauthenticated behavior
+   * for backward compatibility, but a warning is logged — especially when
+   * binding to a non-localhost address.
+   */
+  apiKey?: string;
   createMcpServer: (req: RequestContext) => Promise<McpServer | Server>;
+}
+
+/**
+ * Compare two strings in constant time to avoid timing side-channels when
+ * validating the API key.
+ */
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) {
+    // Still run a comparison to keep timing roughly consistent.
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
+
+/**
+ * Build an Express middleware that enforces Bearer token authentication.
+ *
+ * Requests without a valid `Authorization: Bearer <apiKey>` header are
+ * rejected with a JSON-RPC formatted `401` response.
+ */
+function createApiKeyAuthMiddleware(
+  apiKey: string,
+  logger: Logger,
+): MiddlewareFunction {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const header = req.headers.authorization;
+
+    if (typeof header !== 'string' || !header.toLowerCase().startsWith('bearer ')) {
+      logger.warn(
+        `Rejected unauthenticated MCP request from ${req.ip} (missing Bearer token)`,
+      );
+      res
+        .status(401)
+        .set('WWW-Authenticate', 'Bearer realm="mcp-http-server"')
+        .json({
+          jsonrpc: '2.0',
+          error: {
+            code: ErrorCode.InvalidRequest,
+            message:
+              'Unauthorized: missing Authorization header. Expected "Authorization: Bearer <MCP_API_KEY>".',
+          },
+          id: null,
+        } as JSONRPCError);
+      return;
+    }
+
+    const token = header.slice('bearer '.length).trim();
+
+    if (!token || !safeEqual(token, apiKey)) {
+      logger.warn(
+        `Rejected MCP request from ${req.ip} with invalid API key`,
+      );
+      res
+        .status(401)
+        .set('WWW-Authenticate', 'Bearer realm="mcp-http-server", error="invalid_token"')
+        .json({
+          jsonrpc: '2.0',
+          error: {
+            code: ErrorCode.InvalidRequest,
+            message: 'Unauthorized: invalid API key.',
+          },
+          id: null,
+        } as JSONRPCError);
+      return;
+    }
+
+    next();
+  };
 }
 
 export async function startSseAndStreamableHttpMcpServer(
@@ -68,7 +152,13 @@ export async function startSseAndStreamableHttpMcpServer(
     middlewares,
     routes = {},
     logger = new ConsoleLogger(),
+    apiKey,
   } = params;
+
+  // Resolve the API key from explicit params first, then from the
+  // `MCP_API_KEY` environment variable. This keeps the feature opt-in and
+  // backward compatible: when neither is set, the server runs unauthenticated.
+  const resolvedApiKey = apiKey ?? process.env.MCP_API_KEY;
 
   // default routes config
   const routesConfig = {
@@ -111,6 +201,28 @@ export async function startSseAndStreamableHttpMcpServer(
     }
     next();
   });
+
+  // Built-in API key authentication.
+  //
+  // When an API key is configured (via the `apiKey` param or the `MCP_API_KEY`
+  // environment variable), every request must present a matching
+  // `Authorization: Bearer <apiKey>` header. Requests without a valid token
+  // are rejected with `401 Unauthorized` before reaching any MCP endpoint.
+  if (resolvedApiKey) {
+    logger.info(
+      'API key authentication enabled for MCP HTTP server. Clients must send "Authorization: Bearer <MCP_API_KEY>".',
+    );
+    app.use(createApiKeyAuthMiddleware(resolvedApiKey, logger));
+  } else {
+    // Backward compatibility: do not block requests when no key is set, but
+    // surface a clear security warning so operators are aware of the risk.
+    logger.warn(
+      'SECURITY WARNING: MCP HTTP server is running without authentication. ' +
+        'Set the MCP_API_KEY environment variable (or pass `apiKey`) to require ' +
+        'a Bearer token on every request. This is strongly recommended when ' +
+        'binding to a non-localhost address (e.g. host="0.0.0.0").',
+    );
+  }
 
   if (middlewares) {
     middlewares.forEach((middleware) => app.use(middleware));
@@ -261,6 +373,14 @@ export async function startSseAndStreamableHttpMcpServer(
 
   const HOST = host || '127.0.0.1';
   const PORT = Number(port || process.env.PORT || 8080);
+
+  // Extra warning when binding to a network-accessible address without auth.
+  if (!resolvedApiKey && HOST !== '127.0.0.1' && HOST !== 'localhost') {
+    logger.warn(
+      `SECURITY WARNING: Binding MCP HTTP server to "${HOST}" without API key authentication. ` +
+        'Any client on the network can access all MCP tools. Set MCP_API_KEY to require a Bearer token.',
+    );
+  }
 
   return new Promise((resolve, reject) => {
     const appServer = app.listen(PORT, HOST, (error?: Error) => {
