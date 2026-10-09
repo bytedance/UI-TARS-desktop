@@ -41,6 +41,9 @@ export const KEY_MAPPINGS: Record<string, KeyInput> = {
   ctrl: ControlOrMeta,
   cmd: ControlOrMeta,
   command: ControlOrMeta,
+  win: 'Meta',
+  meta: 'Meta',
+  super: 'Meta',
 
   // a-z
   a: 'KeyA',
