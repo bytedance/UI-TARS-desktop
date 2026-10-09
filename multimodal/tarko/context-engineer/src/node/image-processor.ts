@@ -19,12 +19,16 @@ import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
  */
 export class ImageProcessor {
   private compressor: ImageCompressor;
+  private readonly options: { quality: number; format: 'webp' | 'jpeg' | 'png' };
 
   constructor(options: { quality?: number; format?: 'webp' | 'jpeg' | 'png' } = {}) {
-    this.compressor = new ImageCompressor({
+    // Resolved once here so the compression statistics report what this instance
+    // actually runs with, rather than a copy of the compressor's own defaults.
+    this.options = {
       quality: options.quality ?? 5,
       format: options.format ?? 'webp',
-    });
+    };
+    this.compressor = new ImageCompressor(this.options);
   }
 
   /**
@@ -98,8 +102,8 @@ export class ImageProcessor {
         original: formatBytes(originalSize),
         compressed: formatBytes(compressedSize),
         ratio: `${compressionRatio.toFixed(2)}x (${compressionPercentage}% smaller)`,
-        format: 'webp',
-        quality: 80,
+        format: this.options.format,
+        quality: this.options.quality,
       });
 
       return {
