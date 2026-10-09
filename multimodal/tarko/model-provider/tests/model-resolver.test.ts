@@ -142,6 +142,54 @@ describe('resolveModel', () => {
     });
   });
 
+  it.each(['MiniMax-M3', 'MiniMax-M2.7'])('should resolve minimax model %s', (modelId) => {
+    const agentModel: AgentModel = {
+      provider: 'minimax',
+      id: modelId,
+      apiKey: 'minimax-key',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'minimax',
+      id: modelId,
+      displayName: undefined,
+      baseURL: 'https://api.minimax.io/v1',
+      apiKey: 'minimax-key',
+      headers: {},
+      params: undefined,
+      baseProvider: 'openai',
+    });
+  });
+
+  it('should preserve the MiniMax China OpenAI-compatible endpoint', () => {
+    const result = resolveModel({
+      provider: 'minimax',
+      id: 'MiniMax-M3',
+      apiKey: 'minimax-key',
+      baseURL: 'https://api.minimaxi.com/v1',
+    });
+
+    expect(result.baseURL).toBe('https://api.minimaxi.com/v1');
+    expect(result.baseProvider).toBe('openai');
+  });
+
+  it.each([
+    ['global', 'https://api.minimax.io/anthropic'],
+    ['China', 'https://api.minimaxi.com/anthropic'],
+  ])('should preserve the MiniMax %s Anthropic SDK base URL', (_, baseURL) => {
+    const result = resolveModel({
+      provider: 'anthropic',
+      id: 'MiniMax-M3',
+      apiKey: 'minimax-key',
+      baseURL,
+    });
+
+    expect(result.baseURL).toBe(baseURL);
+    expect(result.baseProvider).toBe('anthropic');
+  });
+
   it('should add anthropic_beta params for azure-openai provider with gcp-claude4-sonnet model', () => {
     const agentModel: AgentModel = {
       provider: 'azure-openai',
