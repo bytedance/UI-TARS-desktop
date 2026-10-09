@@ -75,7 +75,7 @@ describe('ContextReferenceProcessor', () => {
         "<file path="test1.txt">
         Hello from test1.txt
         </file>"
-      `
+      `,
       );
     });
 
@@ -108,7 +108,7 @@ describe('ContextReferenceProcessor', () => {
         <file path="test-dir/test2.js">
         const test = "Hello from test2.js";
         </file>"
-      `
+      `,
       );
     });
 
@@ -136,6 +136,40 @@ const test = "Hello from test2.js";
       expect(result).toContain('Workspace Content Summary');
     });
 
+    it('should pack every @dir: reference with its own content only', async () => {
+      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const packPaths = vi
+        .spyOn(processor['workspacePack'], 'packPaths')
+        .mockImplementation(async (paths: string[]) => ({
+          processedPaths: paths,
+          files: [],
+          packedContent: `packed: ${paths.map((p) => path.basename(p)).join(',')}`,
+          stats: { totalFiles: 1, totalSize: 10, errorCount: 0 },
+        }));
+
+      const query = 'Analyze @dir:test-dir and @dir:other-dir';
+      const result = await processor.processContextualReferences(query, testWorkspace);
+
+      // One call per reference, each with a single path, and no shared payload
+      expect(packPaths).toHaveBeenCalledTimes(2);
+      expect(packPaths.mock.calls.map((call) => call[0])).toEqual([
+        [expect.stringContaining('test-dir')],
+        [expect.stringContaining('other-dir')],
+      ]);
+      expect(result).toContain('<directory path="test-dir">\npacked: test-dir\n</directory>');
+      expect(result).toContain('<directory path="other-dir">\npacked: other-dir\n</directory>');
+
+      // Statistics are aggregated over every reference
+      expect(logSpy).toHaveBeenCalledWith('Workspace packing completed:', {
+        paths: 2,
+        files: 2,
+        totalSize: 20,
+        errors: 0,
+      });
+
+      logSpy.mockRestore();
+    });
+
     it('should handle non-existent file references gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -150,7 +184,7 @@ const test = "Hello from test2.js";
         "<file path="non-existent.txt">
         Error: File not found
         </file>"
-      `
+      `,
       );
       expect(consoleSpy).toHaveBeenCalledWith('File reference not found: non-existent.txt');
 
@@ -168,7 +202,7 @@ const test = "Hello from test2.js";
         "<file path="../../../etc/passwd">
         Error: File reference outside workspace
         </file>"
-      `
+      `,
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         'File reference outside workspace: ../../../etc/passwd',
@@ -212,7 +246,7 @@ const test = "Hello from test2.js";
         "<file path="restricted.txt">
         Error: Failed to read file
         </file>"
-      `
+      `,
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         'Failed to read file restricted.txt:',
@@ -238,7 +272,7 @@ const test = "Hello from test2.js";
         "<directory path="test-dir">
         Error: Failed to pack directory
         </directory>"
-      `
+      `,
       );
       expect(consoleSpy).toHaveBeenCalledWith('Failed to pack workspace paths:', expect.any(Error));
 
@@ -288,7 +322,7 @@ const test = "Hello from test2.js";
         "<file path="test[special].txt">
         special content
         </file>"
-      `
+      `,
       );
     });
   });
