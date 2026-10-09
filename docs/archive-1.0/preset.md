@@ -4,7 +4,7 @@
 # Preset Management Guide
 
 > [!IMPORTANT]  
-> Currently, **UI-TARS Desktop** does not directly provide server-side capabilities, so we do not provide a Preset for the open source community. welcome community developers to contribute your presets [here](../examples/presets/).
+> Currently, **UI-TARS Desktop** does not directly provide server-side capabilities, so we do not provide a Preset for the open source community. welcome community developers to contribute your presets [here](../../examples/presets/).
 
 A **preset** is a collection of [settings](./setting.md)  (_Introduced at [#61](https://github.com/bytedance/UI-TARS-desktop/pull/61)_), **UI-TARS Desktop** supports import presets via `files` or `URLs`:
 
@@ -77,5 +77,5 @@ reportStorageBaseUrl: https://your-report-storage-endpoint.com/upload
 utioBaseUrl: https://your-utio-endpoint.com/collect
 ```
 
-See all [example presets](../examples/presets).
+See all [example presets](../../examples/presets).
 
