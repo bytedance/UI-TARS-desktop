@@ -6,12 +6,14 @@
 import fs from 'fs';
 import path from 'path';
 import { AgentAppConfig } from '@tarko/interface';
+import { parseMCPJsonConfig } from '@agent-infra/shared';
 
 /**
  * Workspace configuration file paths
  */
 export const WORKSPACE_CONFIG_PATHS = {
   INSTRUCTIONS: '.tarko/instructions.md',
+  MCP_CONFIG: '.tarko/mcp.json',
   // Future: RULES: '.tarko/rules/*.md',
 } as const;
 
@@ -36,6 +38,35 @@ export function loadWorkspaceConfig(workspacePath: string): Partial<AgentAppConf
     }
   }
 
+  // Load mcp.json if exists (standard MCP JSON config format)
+  const mcpConfigPath = path.join(workspacePath, WORKSPACE_CONFIG_PATHS.MCP_CONFIG);
+  if (fs.existsSync(mcpConfigPath)) {
+    try {
+      const mcpJsonText = fs.readFileSync(mcpConfigPath, 'utf-8').trim();
+      if (mcpJsonText) {
+        const result = parseMCPJsonConfig(mcpJsonText);
+        if (result.errors.length > 0) {
+          console.warn(
+            `Warning: MCP config parse errors in ${mcpConfigPath}: ${result.errors.join('; ')}`,
+          );
+        }
+        if (result.servers.length > 0) {
+          if (!config.mcpServers) {
+            config.mcpServers = {};
+          }
+          for (const server of result.servers) {
+            const { id, name, ...serverConfig } = server as any;
+            config.mcpServers[name] = serverConfig;
+          }
+        }
+      }
+    } catch (error) {
+      console.warn(
+        `Warning: Failed to read ${mcpConfigPath}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
   return config;
 }
 
@@ -49,5 +80,6 @@ export function hasWorkspaceConfig(workspacePath: string): boolean {
   }
 
   const instructionsPath = path.join(workspacePath, WORKSPACE_CONFIG_PATHS.INSTRUCTIONS);
-  return fs.existsSync(instructionsPath);
+  const mcpConfigPath = path.join(workspacePath, WORKSPACE_CONFIG_PATHS.MCP_CONFIG);
+  return fs.existsSync(instructionsPath) || fs.existsSync(mcpConfigPath);
 }
