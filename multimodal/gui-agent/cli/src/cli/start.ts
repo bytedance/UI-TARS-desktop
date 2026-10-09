@@ -68,6 +68,8 @@ export const start = async (options: CliOptions) => {
               { value: 'volcengine', label: 'VolcEngine' },
               { value: 'anthropic', label: 'Anthropic Claude' },
               { value: 'openai', label: 'OpenAI' },
+              { value: 'gemini', label: 'Google Gemini' },
+              { value: 'vertex-ai', label: 'Google Vertex AI' },
               { value: 'lm-studio', label: 'LM Studio' },
               { value: 'deepseek', label: 'DeepSeek' },
               { value: 'ollama', label: 'Ollama' },

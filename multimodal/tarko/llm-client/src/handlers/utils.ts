@@ -30,6 +30,7 @@ import { OpenRouterHandler } from './openrouter.js';
 import { PerplexityHandler } from './perplexity.js';
 import { InputError, MIMEType } from './types.js';
 import { AzureOpenAIHandler } from './azure-openai.js';
+import { VertexAIHandler } from './vertex-ai.js';
 
 export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
   ['openai']: (opts: ConfigOptions) =>
@@ -72,6 +73,16 @@ export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
       models.gemini.supportsToolCalls,
       models.gemini.supportsN,
       models.gemini.supportsStreaming,
+    ),
+  ['vertex-ai']: (opts: ConfigOptions) =>
+    new VertexAIHandler(
+      opts,
+      models['vertex-ai'].models,
+      models['vertex-ai'].supportsJSON,
+      models['vertex-ai'].supportsImages,
+      models['vertex-ai'].supportsToolCalls,
+      models['vertex-ai'].supportsN,
+      models['vertex-ai'].supportsStreaming,
     ),
   ['mistral']: (opts: ConfigOptions) =>
     new MistralHandler(
