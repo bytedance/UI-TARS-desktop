@@ -43,11 +43,11 @@ describe('MessageHistory', () => {
   });
 
   describe('Empty event stream', () => {
-    it('should handle empty event stream', () => {
+    it('should handle empty event stream', async () => {
       // Test with no events added
 
       // Test NativeEngine
-      const nativeMessages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
+      const nativeMessages = await messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
       expect(nativeMessages).toMatchInlineSnapshot(`
         [
           {
@@ -58,7 +58,7 @@ describe('MessageHistory', () => {
       `);
 
       // Test PromptEngineering Engine
-      const promptMessages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
+      const promptMessages = await messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
       expect(promptMessages).toMatchInlineSnapshot(`
         [
           {
