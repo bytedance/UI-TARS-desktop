@@ -178,7 +178,7 @@ The `GUIAgent` constructor accepts the following configuration options:
     - `StatusEnum.MAX_LOOP`: Maximum loop count reached
 - `onError`: Callback for error handling
 - `systemPrompt`: Optional custom system prompt
-- `maxLoopCount`: Maximum number of interaction loops (default: 25)
+- `maxLoopCount`: Maximum number of interaction loops (default: 100)
 
 ### Status flow
 
