@@ -1,6 +1,6 @@
 {
   "name": "@gui-agent/shared",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Shared types for GUI-Agent",
   "repository": {
     "type": "git",
