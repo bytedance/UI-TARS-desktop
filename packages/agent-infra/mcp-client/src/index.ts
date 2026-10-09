@@ -564,6 +564,9 @@ export class MCPClient<
       }
     } catch (error) {
       this.log('error', '[MCP] Error listing tools:', error);
+      if (serverName) {
+        throw error;
+      }
       return [];
     }
   }
