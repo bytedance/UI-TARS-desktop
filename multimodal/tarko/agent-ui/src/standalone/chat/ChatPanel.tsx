@@ -88,7 +88,6 @@ export const ChatPanel: React.FC = () => {
             isDisabled={
               !currentSessionId ||
               currentSessionId === 'creating' ||
-              isProcessing ||
               !connectionStatus.connected ||
               isReplayMode
             }

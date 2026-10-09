@@ -10,7 +10,12 @@ import { Request, Response } from 'express';
 const { mockContextProcessor, mockImageProcessor, mockSession, mockServer } = vi.hoisted(() => ({
   mockContextProcessor: { processContextualReferences: vi.fn() },
   mockImageProcessor: { compressImagesInQuery: vi.fn() },
-  mockSession: { runQuery: vi.fn(), runQueryStreaming: vi.fn() },
+  mockSession: { 
+    runQuery: vi.fn(), 
+    runQueryStreaming: vi.fn(),
+    getProcessingStatus: vi.fn().mockReturnValue(false),
+    insertEnvironmentInput: vi.fn()
+  },
   mockServer: { getCurrentWorkspace: vi.fn().mockReturnValue('/workspace') },
 }));
 
@@ -57,6 +62,8 @@ describe('Contextual References Bug Fix', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockImageProcessor.compressImagesInQuery.mockImplementation(q => Promise.resolve(q));
+    // Reset to default: agent not running
+    mockSession.getProcessingStatus.mockReturnValue(false);
   });
 
   describe('environmentInput conditional logic', () => {
