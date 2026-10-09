@@ -1,2 +1,3 @@
+# pnpm-specific settings
 shamefully-hoist=true
 node-linker=hoisted
