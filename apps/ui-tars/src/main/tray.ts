@@ -42,6 +42,7 @@ export async function createTray() {
       // 根据状态添加或移除点击事件监听
       if (state.status === StatusEnum.RUNNING) {
         tray?.setImage(pauseIcon);
+        tray?.removeListener('click', handleTrayClick);
         tray?.on('click', handleTrayClick);
       } else {
         tray?.setImage(normalIcon);
