@@ -8,6 +8,7 @@ import {
   BrowserView,
   BrowserWindow,
   desktopCapturer,
+  dialog,
   ipcMain,
   session,
   WebContentsView,
@@ -231,4 +232,17 @@ app
     logger.info('app.whenReady end');
   })
 
-  .catch(console.log);
+  .catch((error) => {
+    // Log detailed error information
+    logger.error('Failed to initialize app:', error);
+    logger.error('Error stack:', error.stack);
+
+    // Show user-friendly error dialog
+    dialog.showErrorBox(
+      'UI-TARS Initialization Failed',
+      `Failed to start UI-TARS:\n\n${error.message}\n\nPlease check the logs for details.\n\nThe application will now exit.`,
+    );
+
+    // Exit the application safely
+    app.quit();
+  });
