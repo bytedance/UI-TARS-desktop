@@ -12,9 +12,9 @@ Agent TARS 在架构设计支持就基于 MCP 进行构建，本章节介绍了�
 
 ```ts
 // agent-tars.config.ts
-import { defineConfig } from '@agent-tars/interface';
+import type { AgentTARSAppConfig } from '@agent-tars/interface';
 
-export default defineConfig({
+export default {
   // ...
   mcpServers: {
     'mcp-server-chart': {
@@ -22,7 +22,7 @@ export default defineConfig({
       args: ['-y', '@antv/mcp-server-chart'],
     },
   },
-});
+} satisfies AgentTARSAppConfig;
 ```
 
 我们以 Agent TARS 最近在 CLI 安装体积上的优化举例，输入以下 Prompt:
@@ -64,6 +64,40 @@ Draw a self-driving route map for Hangzhou, Shanghai, and Suzhou
 由于通过 stdio 的方式连接 MCP Servers 本身执行存在耗时，因此通过 stdio 的方式启动 Agent TARS 会导致 Session 的创建和激活变慢，后续我们会进行相关优化，敬请期待。
 :::
 
-## 进阶
+## 远程 MCP 服务
 
-WIP
+对于使用 Streamable HTTP 的远程服务，请在现有 `agent-tars.config.ts` 中配置
+MCP 端点和所需的认证请求头：
+
+```ts
+// agent-tars.config.ts
+import type { AgentTARSAppConfig } from '@agent-tars/interface';
+
+const apiKey = process.env.REMOTE_MCP_API_KEY?.trim();
+if (!apiKey) {
+  throw new Error('Set REMOTE_MCP_API_KEY before starting Agent TARS');
+}
+
+export default {
+  // Keep your existing model and other settings.
+  mcpServers: {
+    // Keep your existing MCP servers here.
+    research: {
+      type: 'streamable-http',
+      url: 'https://mcp.example.com/mcp',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    },
+  },
+} satisfies AgentTARSAppConfig;
+```
+
+将示例 URL 替换为服务的 MCP 端点，并在启动 Agent TARS 的进程环境中设置
+`REMOTE_MCP_API_KEY`。这个 TypeScript 示例显式读取环境变量；
+`'Bearer ${REMOTE_MCP_API_KEY}'` 这样的字面量字符串不会自动读取环境变量。
+请勿将凭据放入 URL 或提交到版本控制的配置文件中。
+
+仅当服务明确提供旧的 HTTP+SSE 传输时，才使用 `type: 'sse'`。
+添加服务时保留已有的 `mcpServers` 条目。启动新会话后，检查是否发现了预期工具；
+会话能够运行本身并不证明远程连接成功。

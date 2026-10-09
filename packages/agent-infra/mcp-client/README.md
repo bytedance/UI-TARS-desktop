@@ -56,7 +56,7 @@ const mcpClient = new MCPClient([
   },
   // streamable-http
   {
-    type: 'sse',
+    type: 'streamable-http',
     name: 'FileSystem-http',
     description: 'filesystem tool',
     url: 'http://localhost:8889/mcp'
