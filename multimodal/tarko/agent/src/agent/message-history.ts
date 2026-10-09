@@ -10,9 +10,12 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionContentPart,
   ToolCallResult,
+  AgentContextAwarenessOptions,
 } from '@tarko/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
 import { getLogger, isTest } from '@tarko/shared-utils';
+import { ContextManager } from '../context-compression/context-manager';
+import { CompressionTrigger } from '../context-compression/types';
 
 /**
  * Interface for image information in messages
@@ -35,6 +38,9 @@ interface ImageReference {
  */
 export class MessageHistory {
   private logger = getLogger('MessageHistory');
+  private contextManager?: ContextManager;
+  private sessionId?: string;
+  private iteration = 0;
 
   /**
    * Creates a new MessageHistory instance
@@ -44,11 +50,35 @@ export class MessageHistory {
    *                         When specified, limits the total number of images in the conversation history
    *                         to prevent context window overflow. Images beyond this limit will be
    *                         replaced with text placeholders to preserve context while reducing token usage.
+   * @param contextAwarenessOptions - Optional context awareness options including compression
    */
   constructor(
     private eventStream: AgentEventStream.Processor,
     private maxImagesCount?: number,
-  ) {}
+    private contextAwarenessOptions?: AgentContextAwarenessOptions,
+  ) {
+    // Initialize context manager if compression is enabled
+    if (this.contextAwarenessOptions?.compression?.enabled !== false) {
+      this.contextManager = new ContextManager(this.contextAwarenessOptions?.compression);
+    }
+  }
+
+  /**
+   * Update session information for compression tracking
+   * @param sessionId Current session identifier
+   * @param iteration Current iteration number
+   * @param modelId Model identifier for token counting
+   * @param provider Model provider
+   */
+  updateSession(sessionId: string, iteration: number, modelId?: string, provider?: string): void {
+    this.sessionId = sessionId;
+    this.iteration = iteration;
+    
+    // Update context manager with model information
+    if (this.contextManager && modelId && provider) {
+      this.contextManager.updateModel(modelId, provider);
+    }
+  }
 
   /**
    * Convert events to message history format for LLM context
@@ -60,6 +90,82 @@ export class MessageHistory {
    * @param tools Available tools to enhance the system prompt
    */
   toMessageHistory(
+    toolCallEngine: ToolCallEngine,
+    customSystemPrompt: string,
+    tools: Tool[] = [],
+  ): ChatCompletionMessageParam[] {
+    // For backward compatibility, use synchronous processing
+    // Async compression will be handled separately in the agent runner
+    return this.buildMessageHistorySync(toolCallEngine, customSystemPrompt, tools);
+  }
+
+  /**
+   * Async version of toMessageHistory with context compression support
+   * This method should be used by the agent runner for compression capabilities
+   *
+   * @param toolCallEngine The tool call engine to use for message formatting
+   * @param systemPrompt The base system prompt to include
+   * @param tools Available tools to enhance the system prompt
+   */
+  async toMessageHistoryAsync(
+    toolCallEngine: ToolCallEngine,
+    customSystemPrompt: string,
+    tools: Tool[] = [],
+  ): Promise<ChatCompletionMessageParam[]> {
+    const messages = this.buildMessageHistorySync(toolCallEngine, customSystemPrompt, tools);
+    const events = this.eventStream.getEvents();
+
+    // Apply context compression if enabled
+    if (this.contextManager && this.sessionId) {
+      const compressionCheck = await this.contextManager.shouldCompress(
+        messages,
+        events,
+        this.sessionId,
+        this.iteration
+      );
+
+      if (compressionCheck.shouldCompress) {
+        this.logger.info(
+          `Context compression triggered: ${compressionCheck.currentTokens} tokens, reason: ${compressionCheck.reason}`
+        );
+
+        try {
+          const compressionResult = await this.contextManager.compress(
+            messages,
+            events,
+            this.sessionId,
+            this.iteration,
+            compressionCheck.reason
+          );
+
+          // Send compression event to event stream
+          const compressionEvent = this.eventStream.createEvent('system', {
+            level: 'info',
+            message: `Context compressed: ${compressionResult.stats.originalMessageCount} → ${compressionResult.stats.compressedMessageCount} messages (${(compressionResult.stats.compressionRatio * 100).toFixed(1)}% reduction)`,
+            details: {
+              strategy: compressionResult.stats.strategy,
+              originalTokens: compressionResult.stats.originalTokens,
+              compressedTokens: compressionResult.stats.compressedTokens,
+              compressionRatio: compressionResult.stats.compressionRatio,
+            },
+          });
+          this.eventStream.sendEvent(compressionEvent);
+
+          return compressionResult.messages;
+        } catch (error) {
+          this.logger.error(`Context compression failed: ${error}`);
+          // Fall back to original messages if compression fails
+        }
+      }
+    }
+
+    return messages;
+  }
+
+  /**
+   * Build message history synchronously (for backward compatibility)
+   */
+  private buildMessageHistorySync(
     toolCallEngine: ToolCallEngine,
     customSystemPrompt: string,
     tools: Tool[] = [],
