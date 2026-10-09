@@ -133,7 +133,7 @@ export async function processRequestCommand(options: {
                   colorize(call.function?.name || 'Unknown', 'bold'),
               );
               console.log(
-                '     ' + colorize('Arguments:', 'dim') + ' ' + call.function?.arguments || '{}',
+                '     ' + colorize('Arguments:', 'dim') + ' ' + (call.function?.arguments || '{}'),
               );
             });
           }
