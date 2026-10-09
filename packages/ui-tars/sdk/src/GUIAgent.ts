@@ -406,8 +406,16 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               });
             });
 
+            if (data.status === StatusEnum.ERROR) {
+              break;
+            }
+
             if (executeOutput && executeOutput?.status) {
               data.status = executeOutput.status;
+            }
+
+            if (data.status === StatusEnum.ERROR) {
+              break;
             }
           }
 

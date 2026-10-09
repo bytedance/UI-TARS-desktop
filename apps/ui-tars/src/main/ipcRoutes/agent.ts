@@ -62,14 +62,12 @@ export const agentRoute = t.router({
     const guiAgent = GUIAgentManager.getInstance().getAgent();
     if (guiAgent instanceof GUIAgent) {
       guiAgent.pause();
-      store.setState({ thinking: false });
     }
   }),
   resumeRun: t.procedure.input<void>().handle(async () => {
     const guiAgent = GUIAgentManager.getInstance().getAgent();
     if (guiAgent instanceof GUIAgent) {
       guiAgent.resume();
-      store.setState({ thinking: false });
     }
   }),
   stopRun: t.procedure.input<void>().handle(async () => {
