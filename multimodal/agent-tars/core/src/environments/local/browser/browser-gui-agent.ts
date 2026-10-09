@@ -281,6 +281,26 @@ wait()                                         - Wait 5 seconds and take a scree
       const { originalSize, screenshotTime, compressedSize, compressedBase64, currentUrl } =
         await this.screenshot();
 
+      // Skip sending screenshot for empty pages — the agent should navigate first
+      if (!currentUrl || currentUrl === 'about:blank') {
+        this.logger.info('Page is empty (about:blank), skipping screenshot');
+        const emptyPageEvent = eventStream.createEvent('environment_input', {
+          content: [
+            {
+              type: 'text',
+              text: 'Browser is open but no page is loaded (about:blank). Use browser_navigate to open a URL before using browser_vision_control.',
+            },
+          ],
+          description: 'Browser Status',
+          metadata: {
+            type: 'screenshot',
+            url: currentUrl || 'about:blank',
+          },
+        });
+        eventStream.sendEvent(emptyPageEvent);
+        return;
+      }
+
       this.currentScreenshot = compressedBase64;
 
       // Calculate compression ratio and percentage
