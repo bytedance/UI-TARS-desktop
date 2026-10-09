@@ -1,0 +1,37 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Run tests"
+  lane :test do
+    scan(
+      scheme: "UITarsApp",
+      device: "iPhone 16",
+      clean: true
+    )
+  end
+
+  desc "Build for TestFlight"
+  lane :beta do
+    increment_build_number
+    build_app(
+      scheme: "UITarsApp",
+      export_method: "app-store"
+    )
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Build for App Store release"
+  lane :release do
+    increment_build_number
+    build_app(
+      scheme: "UITarsApp",
+      export_method: "app-store"
+    )
+    upload_to_app_store(
+      force: true,
+      submit_for_review: true
+    )
+  end
+end

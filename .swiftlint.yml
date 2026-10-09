@@ -1,0 +1,33 @@
+included:
+  - ios
+
+excluded:
+  - ios/.build
+
+disabled_rules:
+  - trailing_comma
+  - todo
+
+opt_in_rules:
+  - empty_count
+  - closure_spacing
+  - contains_over_first_not_nil
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - modifier_order
+
+line_length:
+  warning: 140
+  error: 200
+
+type_body_length:
+  warning: 300
+  error: 500
+
+file_length:
+  warning: 500
+  error: 800
+
+function_body_length:
+  warning: 60
+  error: 100
