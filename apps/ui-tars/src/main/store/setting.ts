@@ -30,6 +30,12 @@ export const DEFAULT_SETTING: LocalStore = {
   operator: Operator.LocalComputer,
   reportStorageBaseUrl: '',
   utioBaseUrl: '',
+  // Proxy Settings
+  proxyEnabled: false,
+  proxyMode: 'system',
+  httpProxy: '',
+  httpsProxy: '',
+  noProxy: '',
 };
 
 export class SettingStore {

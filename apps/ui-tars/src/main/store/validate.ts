@@ -33,6 +33,13 @@ export const PresetSchema = z.object({
   reportStorageBaseUrl: z.string().url().optional(),
   utioBaseUrl: z.string().url().optional(),
   presetSource: PresetSourceSchema.optional(),
+
+  // Proxy Settings
+  proxyEnabled: z.boolean().optional(),
+  proxyMode: z.enum(['system', 'custom']).optional(),
+  httpProxy: z.string().optional(),
+  httpsProxy: z.string().optional(),
+  noProxy: z.string().optional(),
 });
 
 export type PresetSource = z.infer<typeof PresetSourceSchema>;
