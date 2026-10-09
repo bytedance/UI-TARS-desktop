@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog';
+import { useI18n } from '../../i18n';
 
 interface DeleteSessionDialogProps {
   open: boolean;
@@ -24,23 +25,24 @@ export function DeleteSessionDialog({
   onOpenChange,
   onConfirm,
 }: DeleteSessionDialogProps) {
+  const { t } = useI18n();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Session</AlertDialogTitle>
+          <AlertDialogTitle>{t('deleteSession')}</AlertDialogTitle>
           <AlertDialogDescription>
-            The current session is running. Navigating away will forcibly stop
-            the session. Do you still want to proceed?
+            {t('deleteSessionDescription')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600"
             onClick={onConfirm}
           >
-            Delete
+            {t('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

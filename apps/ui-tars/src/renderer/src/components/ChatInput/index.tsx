@@ -26,6 +26,7 @@ import { useSession } from '@renderer/hooks/useSession';
 
 import { Operator } from '@main/store/types';
 import { useSetting } from '../../hooks/useSetting';
+import { useI18n } from '../../i18n';
 
 const ChatInput = ({
   operator,
@@ -38,6 +39,7 @@ const ChatInput = ({
   disabled: boolean;
   checkBeforeRun?: () => Promise<boolean>;
 }) => {
+  const { t } = useI18n();
   const {
     status,
     instructions: savedInstructions,
@@ -187,10 +189,7 @@ const ChatInput = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="whitespace-pre-line">
-                send last instructions when you done for ui-tars&apos;s
-                &apos;CALL_USER&apos;
-              </p>
+              <p className="whitespace-pre-line">{t('callUserTooltip')}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -221,7 +220,7 @@ const ChatInput = ({
                 ? `${savedInstructions}`
                 : running && lastHumanMessage && messages?.length > 1
                   ? lastHumanMessage
-                  : 'What can I do for you today?'
+                  : t('chatPlaceholder')
             }
             className="min-h-[120px] rounded-2xl resize-none px-4 pb-16" // 调整内边距
             value={localInstructions}

@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@renderer/components/ui/select';
 import { Input } from '@renderer/components/ui/input';
+import { useI18n } from '../../../i18n';
 
 const formSchema = z.object({
   language: z.enum(['en', 'zh']),
@@ -33,6 +34,7 @@ const formSchema = z.object({
 });
 
 export function ChatSettings() {
+  const { t } = useI18n();
   const { settings, updateSetting } = useSetting();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -97,17 +99,15 @@ export function ChatSettings() {
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>Language</FormLabel>
-                  <FormDescription>
-                    Control the language used in LLM conversations
-                  </FormDescription>
+                  <FormLabel>{t('language')}</FormLabel>
+                  <FormDescription>{t('languageDescription')}</FormDescription>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select language" />
+                      <SelectValue placeholder={t('selectLanguage')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="zh">中文</SelectItem>
+                      <SelectItem value="en">{t('english')}</SelectItem>
+                      <SelectItem value="zh">{t('chinese')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -121,10 +121,8 @@ export function ChatSettings() {
               // console.log('field', field);
               return (
                 <FormItem>
-                  <FormLabel>Max Loop</FormLabel>
-                  <FormDescription>
-                    Enter a number between 25-200
-                  </FormDescription>
+                  <FormLabel>{t('maxLoop')}</FormLabel>
+                  <FormDescription>{t('maxLoopDescription')}</FormDescription>
                   <FormControl>
                     <Input
                       type="number"
@@ -143,12 +141,12 @@ export function ChatSettings() {
             name="loopIntervalInMs"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Loop Wait Time (ms)</FormLabel>
-                <FormDescription>Enter a number between 0-3000</FormDescription>
+                <FormLabel>{t('loopWaitTime')}</FormLabel>
+                <FormDescription>{t('loopWaitDescription')}</FormDescription>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter a number between 0-3000"
+                    placeholder={t('loopWaitDescription')}
                     {...field}
                     value={field.value === 0 ? '' : field.value}
                     onChange={(e) => field.onChange(Number(e.target.value))}

@@ -9,18 +9,21 @@ import {
   SidebarMenu,
   SidebarMenuButton,
 } from '@renderer/components/ui/sidebar';
+import { useI18n } from '../../i18n';
 
 interface NavSettingsProps {
   onClick: () => void;
 }
 
 export function NavSettings({ onClick }: NavSettingsProps) {
+  const { t } = useI18n();
+
   return (
     <SidebarGroup>
       <SidebarMenu className="items-center">
         <SidebarMenuButton className="font-medium" onClick={onClick}>
           <Settings />
-          <span>Settings</span>
+          <span>{t('settings')}</span>
         </SidebarMenuButton>
       </SidebarMenu>
     </SidebarGroup>

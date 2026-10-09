@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from '@renderer/components/ui/form';
 import { Input } from '@renderer/components/ui/input';
+import { useI18n } from '../../../i18n';
 
 const formSchema = z.object({
   reportStorageBaseUrl: z.string().optional(),
@@ -28,6 +29,7 @@ export interface VLMSettingsRef {
 }
 
 export function ReportSettings() {
+  const { t } = useI18n();
   const { settings, updateSetting } = useSetting();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -85,7 +87,7 @@ export function ReportSettings() {
             name="reportStorageBaseUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Report Storage Base URL</FormLabel>
+                <FormLabel>{t('reportStorageBaseUrl')}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="https://your-report-storage-endpoint.com/upload"
@@ -102,7 +104,7 @@ export function ReportSettings() {
             name="utioBaseUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>UTIO Base URL</FormLabel>
+                <FormLabel>{t('utioBaseUrl')}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="https://your-utio-endpoint.com/collect"
