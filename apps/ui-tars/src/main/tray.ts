@@ -25,13 +25,23 @@ export async function createTray() {
     .createFromPath(path.join(__dirname, '../../resources/pause-light.png'))
     .resize({ width: 16, height: 16 });
 
+  const runningIcon = nativeImage
+    .createFromPath(path.join(__dirname, '../../resources/running-light.png'))
+    .resize({ width: 16, height: 16 });
+
   tray = new Tray(normalIcon);
   // 初始化状态
   tray?.setImage(normalIcon);
 
   // 点击处理函数
   const handleTrayClick = async () => {
-    await server.stopRun();
+    const currentState = store.getState();
+
+    if (currentState.status === StatusEnum.RUNNING) {
+      await server.pauseRun();
+    } else if (currentState.status === StatusEnum.PAUSE) {
+      await server.resumeRun();
+    }
   };
 
   // 监听状态变化
@@ -40,12 +50,19 @@ export async function createTray() {
       // 更新右键菜单
       updateContextMenu();
       // 根据状态添加或移除点击事件监听
+
+      // Remove the previous click listener
+      tray?.removeListener('click', handleTrayClick);
+
       if (state.status === StatusEnum.RUNNING) {
+        tray?.setImage(runningIcon);
+        tray?.on('click', handleTrayClick); // left click to pause
+      } else if (state.status === StatusEnum.PAUSE) {
         tray?.setImage(pauseIcon);
-        tray?.on('click', handleTrayClick);
+        tray?.on('click', handleTrayClick); // left click to resume
       } else {
+        // Do not add click listener in non-running state
         tray?.setImage(normalIcon);
-        tray?.removeListener('click', handleTrayClick);
       }
     }
   });
