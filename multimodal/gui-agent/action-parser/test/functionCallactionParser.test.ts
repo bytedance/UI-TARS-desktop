@@ -123,6 +123,18 @@ describe('ActionParserHelper', () => {
       });
     });
 
+    it('should keep a numeric wait time from the function call arguments', () => {
+      const input = '{"name": "wait", "arguments": "{\\"time\\": 5}"}';
+      const result = helper.parseFunctionCallString(input);
+
+      expect(result).toEqual({
+        type: 'wait',
+        inputs: {
+          time: 5,
+        },
+      });
+    });
+
     it('should throw error for invalid JSON string', () => {
       const input = '{"name": "scroll", "arguments": invalid json}';
 
