@@ -56,7 +56,11 @@ export const MoveFileArgsSchema = z.object({
 export const SearchFilesArgsSchema = z.object({
   path: z.string(),
   pattern: z.string(),
-  excludePatterns: z.array(z.string()).optional().default([]),
+  excludePatterns: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe('Additional glob patterns to exclude from the search'),
 });
 
 export const GetFileInfoArgsSchema = z.object({

@@ -10,7 +10,7 @@ import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
 
-import { minimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 import {
   CreateDirectoryArgsSchema,
   DirectoryTreeArgsSchema,
@@ -32,6 +32,25 @@ import {
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 let allowedDirectories: string[] = [];
+
+// Keep aligned with the safe directory_tree defaults in Agent TARS.
+const DEFAULT_EXCLUDE_PATTERNS = [
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  '.next',
+  '.nuxt',
+  'coverage',
+  '.nyc_output',
+  'logs',
+  '.cache',
+  'tmp',
+  'temp',
+  '*.log',
+  '.DS_Store',
+  'Thumbs.db',
+];
 
 /**
  * dynamic set allowed directories
@@ -118,12 +137,47 @@ async function validatePath(requestedPath: string): Promise<string> {
   }
 }
 
+function createExcludeMatcher(
+  pattern: string,
+): (relativePath: string, isDirectory: boolean) => boolean {
+  const normalizedPattern = pattern
+    .split(path.sep)
+    .join('/')
+    .replace(/^\.\/+/, '')
+    .replace(/\/+$/, '');
+
+  if (!normalizedPattern) {
+    return () => false;
+  }
+
+  const matcher = new Minimatch(normalizedPattern, {
+    dot: true,
+    magicalBraces: true,
+    matchBase: true,
+    nocomment: true,
+    nonegate: true,
+  });
+  const hasMagic = matcher.hasMagic();
+
+  return (relativePath: string, isDirectory: boolean) =>
+    matcher.match(relativePath) ||
+    (isDirectory && matcher.match(`${relativePath}/`)) ||
+    (!hasMagic &&
+      (relativePath === normalizedPattern ||
+        relativePath.startsWith(`${normalizedPattern}/`) ||
+        relativePath.endsWith(`/${normalizedPattern}`) ||
+        relativePath.includes(`/${normalizedPattern}/`)));
+}
+
 async function searchFiles(
   rootPath: string,
   pattern: string,
   excludePatterns: string[] = [],
 ): Promise<string[]> {
   const results: string[] = [];
+  const excludeMatchers = [...DEFAULT_EXCLUDE_PATTERNS, ...excludePatterns].map(
+    createExcludeMatcher,
+  );
 
   async function search(currentPath: string) {
     const entries = await fs.readdir(currentPath, { withFileTypes: true });
@@ -132,21 +186,20 @@ async function searchFiles(
       const fullPath = path.join(currentPath, entry.name);
 
       try {
-        // Validate each path before processing
-        await validatePath(fullPath);
-
-        // Check if path matches any exclude pattern
-        const relativePath = path.relative(rootPath, fullPath);
-        const shouldExclude = excludePatterns.some((pattern) => {
-          const globPattern = pattern.includes('*')
-            ? pattern
-            : `**/${pattern}/**`;
-          return minimatch(relativePath, globPattern, { dot: true });
-        });
+        const relativePath = path
+          .relative(rootPath, fullPath)
+          .split(path.sep)
+          .join('/');
+        const shouldExclude = excludeMatchers.some((matches) =>
+          matches(relativePath, entry.isDirectory()),
+        );
 
         if (shouldExclude) {
           continue;
         }
+
+        // Validate each path before processing
+        await validatePath(fullPath);
 
         if (entry.name.toLowerCase().includes(pattern.toLowerCase())) {
           results.push(fullPath);
@@ -412,8 +465,10 @@ function createServer(args: { allowedDirectories: string[] }): McpServer {
     'search_files',
     'Recursively search for files and directories matching a pattern. ' +
       'Searches through all subdirectories from the starting path. The search ' +
-      'is case-insensitive and matches partial names. Returns full paths to all ' +
-      "matching items. Great for finding files when you don't know their exact location. " +
+      'is case-insensitive and matches partial names. Common dependency, build, ' +
+      'cache, log, and version-control paths are excluded by default; use ' +
+      'excludePatterns to add more exclusions. Returns full paths to all matching ' +
+      "items. Great for finding files when you don't know their exact location. " +
       'Only searches within allowed directories.',
     SearchFilesArgsSchema.shape,
     async (args) => {
