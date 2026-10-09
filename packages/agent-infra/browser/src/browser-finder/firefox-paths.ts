@@ -16,7 +16,10 @@ function getFirefoxOnLinux(name: 'firefox'): string | null {
   try {
     const path = which.sync(name);
     return path;
-  } catch (e) {}
+  } catch (e) {
+    // which.sync() throws when command not found - this is expected
+    // when Firefox is not installed on the system. Continue trying other methods.
+  }
 
   return null;
 }
