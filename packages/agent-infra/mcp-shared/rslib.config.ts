@@ -12,8 +12,7 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      client: ['src/client/**/*.ts'],
-      server: ['src/server/**/*.ts'],
+      index: ['./src/**'],
     },
   },
   lib: [
