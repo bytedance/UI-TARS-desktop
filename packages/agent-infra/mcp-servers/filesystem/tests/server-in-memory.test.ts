@@ -1,7 +1,17 @@
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+} from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../src/server.js';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'path';
 import url from 'node:url';
 
@@ -98,6 +108,72 @@ describe('MCP Server in memory', () => {
           ],
         });
       });
+    });
+  });
+
+  describe('create_directory', () => {
+    let client: Client;
+    let workspace: string;
+
+    beforeEach(async () => {
+      workspace = await fs.mkdtemp(path.join(os.tmpdir(), 'mcp-filesystem-'));
+      client = new Client({
+        name: 'test client',
+        version: '1.0',
+      });
+
+      const server = createServer({ allowedDirectories: [workspace] });
+      const [clientTransport, serverTransport] =
+        InMemoryTransport.createLinkedPair();
+
+      await Promise.all([
+        client.connect(clientTransport),
+        server.connect(serverTransport),
+      ]);
+    });
+
+    afterEach(async () => {
+      await client.close();
+      await fs.rm(workspace, { recursive: true, force: true });
+    });
+
+    test('creates all missing parent directories recursively', async () => {
+      const nestedPath = path.join(workspace, 'missing-parent', 'child');
+
+      await client.callTool({
+        name: 'create_directory',
+        arguments: { path: nestedPath },
+      });
+
+      await expect(fs.stat(nestedPath)).resolves.toMatchObject({
+        isDirectory: expect.any(Function),
+      });
+    });
+
+    test('does not create directories through an outside symlink', async () => {
+      const outside = await fs.mkdtemp(
+        path.join(os.tmpdir(), 'mcp-filesystem-outside-'),
+      );
+      const link = path.join(workspace, 'outside-link');
+
+      try {
+        await fs.symlink(
+          outside,
+          link,
+          process.platform === 'win32' ? 'junction' : 'dir',
+        );
+        const result = await client.callTool({
+          name: 'create_directory',
+          arguments: { path: path.join(link, 'child') },
+        });
+
+        expect(result.isError).toBe(true);
+        await expect(
+          fs.stat(path.join(outside, 'child')),
+        ).rejects.toMatchObject({ code: 'ENOENT' });
+      } finally {
+        await fs.rm(outside, { recursive: true, force: true });
+      }
     });
   });
 });
