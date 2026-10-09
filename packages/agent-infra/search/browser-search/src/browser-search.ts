@@ -14,7 +14,11 @@ import {
   extractPageInformation,
   toMarkdown,
 } from '@agent-infra/shared';
-import { shouldSkipDomain } from './utils/url';
+import {
+  normalizeExcludedDomains,
+  shouldExcludeDomain,
+  shouldSkipDomain,
+} from './utils/url';
 import { interceptRequest } from './utils/misc';
 import { getSearchEngine } from './engines';
 import type {
@@ -56,7 +60,9 @@ export class BrowserSearch {
     const queries = Array.isArray(options.query)
       ? options.query
       : [options.query];
-    const excludeDomains = options.excludeDomains || [];
+    const excludeDomains = normalizeExcludedDomains(
+      options.excludeDomains || [],
+    );
     const count =
       options.count && Math.max(3, Math.floor(options.count / queries.length));
     const engine = options.engine || this.defaultEngine;
@@ -158,9 +164,15 @@ export class BrowserSearch {
     // Filter links
     links =
       links?.filter((link) => {
+        if (
+          shouldSkipDomain(link.url) ||
+          shouldExcludeDomain(link.url, options.excludeDomains)
+        ) {
+          return false;
+        }
         if (options.visitedUrls.has(link.url)) return false;
         options.visitedUrls.add(link.url);
-        return !shouldSkipDomain(link.url);
+        return true;
       }) || [];
 
     if (!links.length) {
