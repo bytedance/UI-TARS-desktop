@@ -10,6 +10,8 @@ English | [简体中文](./README.zh-CN.md)
 
 [![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
 
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/bytedance/UI-TARS-desktop)](https://archestra.ai/mcp-catalog/bytedance__ui-tars-desktop)
+
 <b>TARS<sup>\*</sup></b> is a Multimodal AI Agent stack, currently shipping two projects: [Agent TARS](#agent-tars) and [UI-TARS-desktop](#ui-tars-desktop):
 
 <table>
