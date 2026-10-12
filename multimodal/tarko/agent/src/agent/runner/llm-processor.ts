@@ -313,6 +313,14 @@ export class LLMProcessor {
 
       allChunks.push(chunk);
 
+      if (!chunk.choices?.length) {
+        if (chunk.usage) {
+          continue;
+        }
+
+        throw new Error('Streaming chunk must include choices or usage');
+      }
+
       // Process the chunk using the tool call engine
       const chunkResult = toolCallEngine.processStreamingChunk(chunk, processingState);
 
