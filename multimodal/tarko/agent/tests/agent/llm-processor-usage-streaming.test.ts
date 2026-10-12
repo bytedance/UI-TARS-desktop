@@ -54,10 +54,15 @@ describe('LLMProcessor Usage in Streaming Mode', () => {
                   ],
                 } as ChatCompletionChunk;
 
-                // Last chunk with usage information
+                // Usage-only chunks may have no choices.
                 yield {
                   id: 'test-completion',
-                  choices: [{ delta: {}, index: 0, finish_reason: 'stop' }],
+                  choices: [],
+                  usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+                } as ChatCompletionChunk;
+
+                yield {
+                  id: 'test-completion',
                   usage: mockUsage,
                 } as ChatCompletionChunk;
               },
