@@ -65,6 +65,7 @@ graph TD
 ```yaml
 name: UI TARS Desktop Example Preset
 language: en
+operator: Local Computer Operator
 vlmProvider: Hugging Face for UI-TARS-1.5
 vlmBaseUrl: https://your-endpoint.huggingface.cloud/v1
 vlmApiKey: your_api_key
