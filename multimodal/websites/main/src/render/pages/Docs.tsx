@@ -26,7 +26,8 @@ const Docs: React.FC = () => {
     }
   }, [docId, navigate, firstAvailableDoc]);
 
-  const currentDoc = availableDocs.find(doc => doc.id === currentDocId)!;
+  const currentDoc = availableDocs.find(doc => doc.id === currentDocId);
+  const currentDocTitle = currentDoc?.title ?? 'Document Not Found';
 
   // Get GitHub edit URL
   const githubEditUrl = currentDocId ? getGithubEditPath(currentDocId) : undefined;
@@ -58,7 +59,7 @@ const Docs: React.FC = () => {
   return (
     <>
       <TwitterCardMeta
-        title={`${currentDoc.title} | Agent TARS Docs`}
+        title={`${currentDocTitle} | Agent TARS Docs`}
         description="Agent TARS documentation and guides"
         url={`${window.location.origin}${ETopRoute.DOC}/${currentDocId}`}
       />
@@ -92,7 +93,7 @@ const Docs: React.FC = () => {
                 markdown={markdown}
                 isLoading={isLoading}
                 contentKey={currentDocId}
-                publishDate={currentDoc.publishDate}
+                publishDate={currentDoc?.publishDate}
                 githubEditUrl={githubEditUrl}
               />
             </div>
