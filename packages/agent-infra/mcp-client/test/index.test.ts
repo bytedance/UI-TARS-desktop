@@ -597,6 +597,7 @@ describe('MCPClient', () => {
       await client.addServer(server);
 
       expect(startedHandler).toHaveBeenCalledWith({ name: 'event-server' });
+      expect(startedHandler).toHaveBeenCalledTimes(1);
     });
 
     it('should emit server-stopped event on deactivation', async () => {
