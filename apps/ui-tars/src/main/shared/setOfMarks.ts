@@ -56,7 +56,14 @@ export const setOfMarksOverlays = ({
           });
           const clickX = coords.x;
           const clickY = coords.y;
-          if (!clickX || !clickY) break;
+          if (
+            clickX === null ||
+            clickY === null ||
+            !Number.isFinite(clickX) ||
+            !Number.isFinite(clickY)
+          ) {
+            break;
+          }
 
           boxWidth = 250;
           boxHeight = 100;

@@ -48,7 +48,12 @@ export const useScreenRecord = (
         const url = DOMURL.createObjectURL(svgBlob);
 
         img.onload = function () {
-          if (xPos && yPos) {
+          if (
+            xPos !== undefined &&
+            yPos !== undefined &&
+            Number.isFinite(xPos) &&
+            Number.isFinite(yPos)
+          ) {
             ctx.drawImage(img, xPos + offsetX, yPos + offsetY);
             lastPosRef.current = { xPos, yPos };
           }
