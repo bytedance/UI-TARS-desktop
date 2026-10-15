@@ -116,31 +116,31 @@ After the application starts, you can see the UI-TARS interface within the appli
 
 #### Main process reload
 
-By default, `pnpm run dev` only has frontend Hot Module Replacement (HMR) hot updates. If you need to simultaneously reload the main process during debugging, you can execute `pnpm run dev:w`.
+By default, `pnpm run dev:ui-tars` only has frontend Hot Module Replacement (HMR) hot updates. If you need to simultaneously reload the main process during debugging, you can execute `pnpm --dir apps/ui-tars run dev:w`.
 
 ```bash
-$ pnpm run dev:w
+$ pnpm --dir apps/ui-tars run dev:w
 ```
 
 #### Building
 
-Run `pnpm run build` in current system, it will output into `out/*` directory.
+Run `pnpm --dir apps/ui-tars run build` in current system, it will output into `apps/ui-tars/out/*` directory.
 
 To build the products of other systems, run:
-- Mac x64: `pnpm run publish:mac-x64`
-- Mac ARM: `pnpm run publish:mac-arm64`
-- Windows x64: `pnpm run publish:win32`
-- Windows ARM: `pnpm run publish:win32-arm64`
+- Mac x64: `pnpm --dir apps/ui-tars run publish:mac-x64`
+- Mac ARM: `pnpm --dir apps/ui-tars run publish:mac-arm64`
+- Windows x64: `pnpm --dir apps/ui-tars run publish:win32`
+- Windows ARM: `pnpm --dir apps/ui-tars run publish:win32-arm64`
 
 ### Release
 
 #### Desktop Application
 
-The CI pipeline to execute is [.github/workflows/release.yml](.github/workflows/release.yml), only manual triggered by maintainers. If you're a maintainer, you can follow the steps below to release the application:
+The CI pipeline to execute is [.github/workflows/release-ui-tars.yml](.github/workflows/release-ui-tars.yml), only manually triggered by maintainers. If you're a maintainer, you can follow the steps below to release the application:
 
 1. Edit the `version` in `package.json`
 2. Git commit and push to the `release/${version}` branch, create a PR targeting `main` branch, titled `release(app): ${version}`
-3. Trigger the release [workflow](https://github.com/bytedance/UI-TARS-desktop/actions/workflows/release.yml) manually after the PR is merged
+3. Trigger the release [workflow](https://github.com/bytedance/UI-TARS-desktop/actions/workflows/release-ui-tars.yml) manually after the PR is merged
 
 Currently, the release workflow supports the following platforms:
 
@@ -197,7 +197,7 @@ pnpm run test
 #### E2E test
 
 ```bash
-pnpm run test:e2e
+pnpm exec turbo run ui-tars-desktop#test:e2e
 ```
 
 ## Submitting Changes
