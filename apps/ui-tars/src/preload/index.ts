@@ -48,7 +48,12 @@ const electronHandler = {
       ipcRenderer.invoke('setting:updatePresetFromRemote'),
     resetPreset: () => ipcRenderer.invoke('setting:resetPreset'),
     onUpdate: (callback: (setting: LocalStore) => void) => {
-      ipcRenderer.on('setting-updated', (_, state) => callback(state));
+      const subscription = (_: IpcRendererEvent, state: LocalStore) => callback(state);
+      ipcRenderer.on('setting-updated', subscription);
+
+      return () => {
+        ipcRenderer.removeListener('setting-updated', subscription);
+      };
     },
   },
 };
