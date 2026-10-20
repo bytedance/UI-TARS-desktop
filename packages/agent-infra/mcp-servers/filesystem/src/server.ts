@@ -396,6 +396,25 @@ function createServer(args: { allowedDirectories: string[] }): McpServer {
       }
       const validSourcePath = await validatePath(parsed.data.source);
       const validDestPath = await validatePath(parsed.data.destination);
+      // fs.rename silently overwrites an existing destination file on POSIX,
+      // but the tool description promises failure instead, so reject the move
+      // up front. lstat also catches symlink destinations. The check and the
+      // rename are not atomic: a destination created concurrently between the
+      // two calls can still be replaced.
+      let destinationExists = false;
+      try {
+        await fs.lstat(validDestPath);
+        destinationExists = true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+          throw error;
+        }
+      }
+      if (destinationExists) {
+        throw new Error(
+          `Destination already exists: ${parsed.data.destination}`,
+        );
+      }
       await fs.rename(validSourcePath, validDestPath);
       return {
         content: [
