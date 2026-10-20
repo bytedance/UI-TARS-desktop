@@ -11,7 +11,12 @@ import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completion
 
 import { getHandler } from '../handlers/utils.js';
 import { models } from '../models.js';
-import { CompletionResponse, ConfigOptions, StreamCompletionResponse } from '../userTypes/index.js';
+import {
+  CompletionResponse,
+  ConfigOptions,
+  StreamCompletionResponse,
+  ChatCompletionMessageParam,
+} from '../userTypes/index.js';
 
 export type OpenAIModel = (typeof models.openai.models)[number];
 export type OpenAINonStreamingModel = (typeof models)['openai-non-streaming']['models'][number];
@@ -59,12 +64,12 @@ type CompletionBase<P extends LLMProvider> = Pick<
   | 'top_p'
   | 'stop'
   | 'n'
-  | 'messages'
   | 'max_tokens'
   | 'response_format'
   | 'tools'
   | 'tool_choice'
 > & {
+  messages: ChatCompletionMessageParam[];
   provider: P;
   model: ProviderModelMap[P];
 };

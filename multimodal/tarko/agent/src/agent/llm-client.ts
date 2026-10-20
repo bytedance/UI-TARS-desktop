@@ -31,8 +31,12 @@ export function getLLMClient(
 `);
 
   return createLLMClient(currentModel, (provider, request, baseURL) => {
+    // Flash always uses adaptive thinking. Preserve explicit request parameters
+    // instead of replacing its protocol default with generic reasoning options.
+    const isMiniMaxFlash =
+      (provider === 'minimax' || provider === 'anthropic') && id === 'MiniMax-M3.1-Flash';
     // Add reasoning options for compatible providers
-    if (provider !== 'openai') {
+    if (provider !== 'openai' && !isMiniMaxFlash) {
       request.thinking = reasoningOptions;
     }
 

@@ -58,7 +58,13 @@ export function resolveModel(
 ): AgentModel {
   // Start with runtime parameters, fall back to agent model configuration
   const provider = runProvider || agentModel?.provider || 'openai';
-  const model = runModel || agentModel?.id || 'gpt-4o';
+  // Known MiniMax Anthropic endpoints need the native Anthropic wire protocol.
+  const isMiniMaxAnthropic =
+    (provider === 'minimax' || provider === 'anthropic') &&
+    /^https:\/\/api\.(minimax\.io|minimaxi\.com)\/anthropic\/?$/.test(agentModel?.baseURL ?? '');
+  const defaultModel =
+    provider === 'minimax' || isMiniMaxAnthropic ? 'MiniMax-M3.1-Flash' : 'gpt-4o';
+  const model = runModel || agentModel?.id || defaultModel;
 
   let baseURL = agentModel?.baseURL;
   let apiKey = agentModel?.apiKey;
@@ -85,6 +91,6 @@ export function resolveModel(
     apiKey,
     headers,
     params,
-    baseProvider: getActualProvider(provider),
+    baseProvider: isMiniMaxAnthropic ? 'anthropic' : getActualProvider(provider),
   };
 }

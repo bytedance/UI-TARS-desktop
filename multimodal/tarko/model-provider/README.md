@@ -52,6 +52,31 @@ const response = await client.chat.completions.create({
 | `lm-studio` | http://127.0.0.1:1234/v1 | 1234 |
 | `volcengine` | https://ark.cn-beijing.volces.com/api/v3 | - |
 | `deepseek` | https://api.deepseek.com/v1 | - |
+| `minimax` | https://api.minimax.io/v1 | - |
+
+### MiniMax Configuration
+
+The recommended MiniMax models are `MiniMax-M3.1-Flash` and `MiniMax-M3`. The `minimax` provider uses `MiniMax-M3.1-Flash` when no model ID is supplied to `resolveModel`, and defaults to the global OpenAI-compatible endpoint. For either `minimax` or `anthropic` with a known MiniMax Anthropic endpoint below, the resolver selects the Anthropic protocol and also defaults to `MiniMax-M3.1-Flash`. Explicit saved, legacy, custom, and runtime model IDs remain unchanged. Override `baseURL` when using the China endpoint or the Anthropic-compatible protocol:
+
+| Protocol             | Global                             | China                                |
+| -------------------- | ---------------------------------- | ------------------------------------ |
+| OpenAI-compatible    | `https://api.minimax.io/v1`        | `https://api.minimaxi.com/v1`        |
+| Anthropic-compatible | `https://api.minimax.io/anthropic` | `https://api.minimaxi.com/anthropic` |
+
+Use `provider: 'minimax'` with the OpenAI-compatible endpoints. For Anthropic-compatible requests, use `provider: 'anthropic'` and one of the Anthropic base URLs above. The Anthropic SDK appends `/v1/messages` to that base URL.
+
+```typescript
+const model = resolveModel({
+  provider: 'anthropic',
+  id: 'MiniMax-M3.1-Flash',
+  baseURL: 'https://api.minimax.io/anthropic',
+  apiKey: 'your-api-key',
+});
+```
+
+Flash always uses adaptive thinking; the agent's generic reasoning switch does not disable it. For the `minimax` provider's OpenAI-compatible requests, set `params.reasoning_effort` to `low`, `medium`, `high`, `xhigh`, or `max` when needed (the API default is `max`). Do not send disabled thinking, `reasoning_effort: 'none'`, `service_tier`, or `reasoning_split: false` for Flash. The Anthropic adapter uses the API's default thinking and effort settings. It exposes thinking as `reasoning_content` and retains signed native blocks in `anthropic_content` for continuation. Pass that field back with assistant messages when using the SDK directly; the agent preserves it automatically through its event history, including tool-result turns.
+
+See the [MiniMax OpenAI-compatible API](https://platform.minimax.io/docs/api-reference/text-openai-api) and [Anthropic-compatible API](https://platform.minimax.io/docs/api-reference/text-anthropic-api) for protocol details.
 
 ### Advanced Configuration
 
@@ -126,7 +151,7 @@ interface AgentModel {
 ```typescript
 type ModelProviderName = 
   | 'openai' | 'anthropic' | 'azure-openai'
-  | 'ollama' | 'lm-studio' | 'volcengine' | 'deepseek';
+  | 'ollama' | 'lm-studio' | 'volcengine' | 'deepseek' | 'minimax';
 ```
 
 ### Functions

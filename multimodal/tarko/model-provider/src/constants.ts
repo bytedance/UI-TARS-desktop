@@ -32,4 +32,9 @@ export const HIGH_LEVEL_MODEL_PROVIDER_CONFIGS: readonly ProviderConfig[] = [
     extends: 'openai',
     baseURL: 'https://api.deepseek.com/v1',
   },
+  {
+    name: 'minimax',
+    extends: 'openai',
+    baseURL: 'https://api.minimax.io/v1',
+  },
 ] as const;

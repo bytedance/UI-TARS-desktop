@@ -29,11 +29,28 @@ export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL'> & {
   };
 };
 
-export type ChatCompletionChoice = Omit<ChatCompletion.Choice, 'finish_reason'> & {
+// Native blocks must survive continuation without reconstructing signed thinking.
+export type AnthropicContentBlock =
+  | { type: 'thinking'; thinking: string; signature?: string }
+  | { type: 'redacted_thinking'; data: string }
+  | { type: 'text'; text: string }
+  | { type: 'tool_use'; id: string; name: string; input: unknown };
+
+export interface AnthropicContinuation {
+  anthropic_content?: AnthropicContentBlock[];
+  reasoning_content?: string;
+}
+
+export type ChatCompletionChoice = Omit<ChatCompletion.Choice, 'finish_reason' | 'message'> & {
+  message: ChatCompletion.Choice['message'] & AnthropicContinuation;
   finish_reason: ChatCompletion.Choice['finish_reason'] | 'unknown';
 };
 
-export type ChatCompletionChunkChoice = Omit<ChatCompletionChunk.Choice, 'finish_reason'> & {
+export type ChatCompletionChunkChoice = Omit<
+  ChatCompletionChunk.Choice,
+  'finish_reason' | 'delta'
+> & {
+  delta: ChatCompletionChunk.Choice['delta'] & AnthropicContinuation;
   finish_reason: ChatCompletionChunk.Choice['finish_reason'] | 'unknown';
 };
 
@@ -47,5 +64,5 @@ export type CompletionResponseChunk = Pick<ChatCompletionChunk, CompletionRespon
   choices: Array<ChatCompletionChunkChoice>;
 };
 export type StreamCompletionResponse = AsyncIterable<CompletionResponseChunk>;
-export type ChatCompletionMessageParam = OpenAICompletionMessageParam;
+export type ChatCompletionMessageParam = OpenAICompletionMessageParam & AnthropicContinuation;
 export type ChatCompletionTool = OpenAIChatCompletionTool;

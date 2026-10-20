@@ -304,6 +304,9 @@ export class MessageHistory {
     toolCallEngine: ToolCallEngine,
   ): void {
     const formattedMessage = toolCallEngine.buildHistoricalAssistantMessage(assistantEvent);
+    if (assistantEvent.anthropicContent) {
+      Object.assign(formattedMessage, { anthropic_content: assistantEvent.anthropicContent });
+    }
     messages.push(formattedMessage);
 
     // Process tool calls if present
