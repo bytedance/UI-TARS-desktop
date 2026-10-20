@@ -23,6 +23,8 @@ import {
   LLMReasoningOptions,
   OpenAI,
   ChatCompletionMessageToolCall,
+  AnthropicContinuation,
+  AnthropicContentBlock,
 } from '@tarko/model-provider';
 import { getLogger } from '@tarko/shared-utils';
 import { ToolProcessor } from './tool-processor';
@@ -300,6 +302,7 @@ export class LLMProcessor {
     let hasReceivedFirstContent = false;
     let lastReasoningContentLength = 0;
     let reasoningCompleted = false;
+    let anthropicContent: AnthropicContentBlock[] | undefined;
 
     this.logger.info(`llm stream start`);
 
@@ -312,6 +315,8 @@ export class LLMProcessor {
       }
 
       allChunks.push(chunk);
+      const continuation = chunk.choices[0]?.delta as AnthropicContinuation | undefined;
+      anthropicContent = continuation?.anthropic_content ?? anthropicContent;
 
       // Process the chunk using the tool call engine
       const chunkResult = toolCallEngine.processStreamingChunk(chunk, processingState);
@@ -443,6 +448,7 @@ export class LLMProcessor {
       ttftMs, // Pass the TTFT only if metrics were calculated
       ttltMs, // Pass the TTLT only if metrics were calculated
       streamingMode, // Pass streaming mode to determine duration calculation
+      anthropicContent,
     );
 
     // Extract usage from the last chunk (streaming APIs typically send usage in the final chunk)
@@ -462,6 +468,7 @@ export class LLMProcessor {
               content: parsedResponse.content || '',
               tool_calls: parsedResponse.toolCalls,
               refusal: null,
+              ...(anthropicContent ? { anthropic_content: anthropicContent } : {}),
             },
             finish_reason: parsedResponse.finishReason || 'stop',
           },
@@ -507,12 +514,14 @@ export class LLMProcessor {
     ttftMs?: number,
     ttltMs?: number,
     streamingMode?: boolean,
+    anthropicContent?: AnthropicContentBlock[],
   ): void {
     // If we have complete content, create a consolidated assistant message event
-    if (content || currentToolCalls.length > 0) {
+    if (content || currentToolCalls.length > 0 || anthropicContent?.length) {
       const assistantEvent = this.eventStream.createEvent('assistant_message', {
         content: content,
         rawContent: rawContent,
+        ...(anthropicContent ? { anthropicContent } : {}),
         toolCalls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
         finishReason: finishReason,
         messageId: messageId, // Include the message ID in the final message

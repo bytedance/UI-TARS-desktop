@@ -147,7 +147,7 @@ describe('MiniMax serialized requests', () => {
     );
 
     it.each(['minimax', 'anthropic'] as const)(
-      'defaults %s on the known Anthropic endpoint to M3 at the SDK boundary',
+      'defaults %s on the known Anthropic endpoint to Flash at the SDK boundary',
       async (provider) => {
         const fixture = await transport('anthropic');
         for (const suffix of ['', '/']) {
@@ -157,7 +157,7 @@ describe('MiniMax serialized requests', () => {
             baseURL: `${origin}/anthropic${suffix}`,
             apiKey: 'test-key',
           });
-          expect(model.id).toBe('MiniMax-M3');
+          expect(model.id).toBe(flash);
           expect(model.baseProvider).toBe('anthropic');
           expect(model.baseURL).toBe(`${origin}/anthropic${suffix}`);
           const client = getLLMClient(
@@ -168,7 +168,7 @@ describe('MiniMax serialized requests', () => {
           expect(response.choices[0].message.content).toBe('ok');
           const request = fixture.requests.at(-1)!;
           expect(request.path).toBe('/anthropic/v1/messages');
-          expect(request.body.model).toBe('MiniMax-M3');
+          expect(request.body.model).toBe(flash);
           expect(request.body).not.toHaveProperty('thinking');
         }
       },
@@ -323,6 +323,28 @@ describe('MiniMax serialized requests', () => {
     expect(fixture.requests[0].body.tools).toMatchObject([
       { name: 'lookup', input_schema: { type: 'object', properties: {} } },
     ]);
+  });
+
+  it('does not leak native Anthropic continuation metadata to OpenAI', async () => {
+    const fixture = await transport('openai');
+    const model = resolveModel({
+      provider: 'openai',
+      id: 'gpt-4o',
+      baseURL: `${fixture.baseURL}/v1`,
+      apiKey: 'test-key',
+    });
+    const client = createLLMClient(model);
+    const saved = {
+      role: 'assistant' as const,
+      content: 'Earlier answer',
+      anthropic_content: [{ type: 'thinking', thinking: 'reasoning', signature: 'opaque' }],
+    };
+    await client.chat.completions.create({ model: model.id, messages: [saved, ...messages] });
+    expect(fixture.requests[0].body.messages).toEqual([
+      { role: 'assistant', content: 'Earlier answer' },
+      ...messages,
+    ]);
+    expect(saved).toHaveProperty('anthropic_content');
   });
 
   it.each(['openai', 'deepseek'] as const)(

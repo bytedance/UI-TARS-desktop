@@ -14,7 +14,7 @@ import {
   Message,
   MessageCreateParamsNonStreaming,
   MessageCreateParamsStreaming,
-  MessageStream,
+  RawMessageStreamEvent,
   TextBlock,
   TextBlockParam,
   ToolResultBlockParam,
@@ -28,6 +28,7 @@ import {
   CompletionResponse,
   CompletionResponseChunk,
   StreamCompletionResponse,
+  AnthropicContentBlock,
 } from '../userTypes/index.js';
 import { BaseHandler } from './base.js';
 import { InputError, InvariantError } from './types.js';
@@ -69,16 +70,15 @@ export const createCompletionResponseNonStreaming = (
 };
 
 export async function* createCompletionResponseStreaming(
-  response: MessageStream,
+  response: AsyncIterable<RawMessageStreamEvent>,
   created: number,
 ): StreamCompletionResponse {
   let message: Message | undefined;
 
-  // We manually keep track of the tool call index because some providers, like Anthropic, start
-  // with a tool call index of 1 because they're preceded by a text block that has an index of 0 in
-  // the `response`. Since OpenAI's tool call index starts with 0, we also enforce that convention
-  // here for consistency.
-  let initialToolCallIndex: number | null = null;
+  // Native block indices include text/thinking; OpenAI tool indices must be dense.
+  const toolIndices = new Map<number, number>();
+  const blocks: AnthropicContentBlock[] = [];
+  const toolInputs = new Map<number, string>();
 
   for await (const chunk of response) {
     if (chunk.type === 'message_start') {
@@ -106,62 +106,69 @@ export async function* createCompletionResponseStreaming(
       throw new InvariantError(`Message is undefined.`);
     }
 
+    // message_delta already emitted the final content, finish reason, and usage.
+    if (chunk.type === 'message_stop') continue;
+
     let newStopReason: Message['stop_reason'] | undefined;
 
     let delta: CompletionResponseChunk['choices'][0]['delta'] = {};
     if (chunk.type === 'content_block_start') {
-      if (chunk.content_block.type === 'text') {
-        delta = {
-          content: chunk.content_block.text,
-        };
-      } else {
-        if (initialToolCallIndex === null) {
-          initialToolCallIndex = chunk.index;
-        }
-
-        delta = {
-          tool_calls: [
-            {
-              index: chunk.index - initialToolCallIndex,
-              id: chunk.content_block.id,
-              type: 'function',
-              function: {
-                name: chunk.content_block.name,
-                arguments: isEmptyObject(chunk.content_block.input)
-                  ? ''
-                  : JSON.stringify(chunk.content_block.input),
-              },
+      // The pinned SDK predates thinking, but its raw SSE transport preserves these events.
+      const block = { ...chunk.content_block } as AnthropicContentBlock;
+      blocks[chunk.index] = block;
+      if (block.type === 'text') {
+        delta.content = block.text;
+      } else if (block.type === 'thinking') {
+        delta.reasoning_content = block.thinking;
+      } else if (block.type === 'tool_use') {
+        const index = toolIndices.size;
+        toolIndices.set(chunk.index, index);
+        delta.tool_calls = [
+          {
+            index,
+            id: block.id,
+            type: 'function',
+            function: {
+              name: block.name,
+              arguments: isEmptyObject(block.input) ? '' : JSON.stringify(block.input),
             },
-          ],
-        };
+          },
+        ];
       }
     } else if (chunk.type === 'content_block_delta') {
-      if (chunk.delta.type === 'input_json_delta') {
-        if (initialToolCallIndex === null) {
-          // We assign the initial tool call index in the `content_block_start` event, which should
-          // always come before a `content_block_delta` event, so this variable should never be null.
-          throw new InvariantError(
-            `Content block delta event came before a content block start event.`,
-          );
+      const change = chunk.delta as
+        | typeof chunk.delta
+        | { type: 'thinking_delta'; thinking: string }
+        | { type: 'signature_delta'; signature: string };
+      const block = blocks[chunk.index];
+      if (change.type === 'input_json_delta') {
+        const index = toolIndices.get(chunk.index);
+        if (index === undefined || block?.type !== 'tool_use') {
+          throw new InvariantError('Tool input delta arrived without a tool block.');
         }
-
-        delta = {
-          tool_calls: [
-            {
-              index: chunk.index - initialToolCallIndex,
-              function: {
-                arguments: chunk.delta.partial_json,
-              },
-            },
-          ],
-        };
-      } else {
-        delta = {
-          content: chunk.delta.text,
-        };
+        toolInputs.set(chunk.index, (toolInputs.get(chunk.index) ?? '') + change.partial_json);
+        delta.tool_calls = [{ index, function: { arguments: change.partial_json } }];
+      } else if (change.type === 'text_delta' && block?.type === 'text') {
+        block.text += change.text;
+        delta.content = change.text;
+      } else if (change.type === 'thinking_delta' && block?.type === 'thinking') {
+        block.thinking += change.thinking;
+        delta.reasoning_content = change.thinking;
+      } else if (change.type === 'signature_delta' && block?.type === 'thinking') {
+        block.signature = (block.signature ?? '') + change.signature;
+      }
+    } else if (chunk.type === 'content_block_stop') {
+      const block = blocks[chunk.index];
+      if (block?.type === 'tool_use' && toolInputs.has(chunk.index)) {
+        block.input = JSON.parse(toolInputs.get(chunk.index)!);
       }
     } else if (chunk.type === 'message_delta') {
       newStopReason = chunk.delta.stop_reason;
+      message.stop_reason = newStopReason;
+      message.usage.output_tokens = chunk.usage.output_tokens;
+      if (blocks.some((block) => block.type === 'thinking' || block.type === 'redacted_thinking')) {
+        delta.anthropic_content = blocks;
+      }
     }
 
     const stopReason = newStopReason !== undefined ? newStopReason : message.stop_reason;
@@ -180,8 +187,15 @@ export async function* createCompletionResponseStreaming(
       model: message.model,
       id: message.id,
       object: 'chat.completion.chunk',
-      // Our SDK doesn't currently support OpenAI's `stream_options`, so we don't include a `usage`
-      // field here.
+      ...(chunk.type === 'message_delta'
+        ? {
+            usage: {
+              prompt_tokens: message.usage.input_tokens,
+              completion_tokens: message.usage.output_tokens,
+              total_tokens: message.usage.input_tokens + message.usage.output_tokens,
+            },
+          }
+        : {}),
     };
   }
 }
@@ -199,6 +213,16 @@ const toChatCompletionChoiceMessage = (
   role: Message['role'],
   toolChoice: CompletionParams['tool_choice'],
 ): CompletionResponse['choices'][0]['message'] => {
+  const nativeBlocks = content as AnthropicContentBlock[];
+  const thinkingBlocks = nativeBlocks.filter((block) => block.type === 'thinking');
+  const continuation = nativeBlocks.some(
+    (block) => block.type === 'thinking' || block.type === 'redacted_thinking',
+  )
+    ? {
+        anthropic_content: nativeBlocks,
+        reasoning_content: thinkingBlocks.map((block) => block.thinking).join(''),
+      }
+    : {};
   const textBlocks = content.filter(isTextBlock);
   if (textBlocks.length > 1) {
     consoleWarn(
@@ -207,7 +231,13 @@ const toChatCompletionChoiceMessage = (
   }
 
   let toolUseBlocks: Anthropic.Messages.ToolUseBlock[];
-  if (typeof toolChoice !== 'string' && toolChoice?.type === 'function') {
+  // Signed native history must retain every tool call so continuation can provide
+  // a matching result for each tool_use block without rewriting signed content.
+  if (
+    !continuation.anthropic_content &&
+    typeof toolChoice !== 'string' &&
+    toolChoice?.type === 'function'
+  ) {
     // When the user-defined tool_choice type is 'function', OpenAI always returns a single tool use
     // block, but Anthropic can return multiple tool use blocks. We select just one of these blocks
     // to conform to OpenAI's API.
@@ -249,6 +279,7 @@ const toChatCompletionChoiceMessage = (
       refusal: null,
       content: messageContent,
       tool_calls: toolCalls,
+      ...continuation,
     };
   } else {
     return {
@@ -256,6 +287,7 @@ const toChatCompletionChoiceMessage = (
       refusal: null,
       content: textBlocks.map((textBlock) => textBlock.text).join('\n'),
       tool_calls: toolCalls,
+      ...continuation,
     };
   }
 };
@@ -413,6 +445,12 @@ export const convertMessages = async (
       };
       currentParams.push(toolResult);
     } else if (message.role === 'assistant') {
+      if (message.anthropic_content?.length) {
+        // Pass native signed blocks back verbatim, without duplicating text/tools.
+        currentParams.push(...(message.anthropic_content as typeof currentParams));
+        previousRole = newRole;
+        continue;
+      }
       if (typeof message.content === 'string') {
         currentParams.push({
           text: message.content,
@@ -573,7 +611,8 @@ export class AnthropicHandler extends BaseHandler<AnthropicModel> {
         tool_choice: toolChoice,
       };
       const created = getTimestamp();
-      const response = client.messages.stream(convertedBody);
+      // Use raw SSE events: the pinned SDK's MessageStream accumulator predates thinking.
+      const response = await client.messages.create(convertedBody);
 
       return createCompletionResponseStreaming(response, created);
     } else {

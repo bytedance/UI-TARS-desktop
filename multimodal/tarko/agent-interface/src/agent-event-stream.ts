@@ -8,6 +8,7 @@
 import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
+  AnthropicContentBlock,
 } from '@tarko/model-provider/types';
 import { AgentStatus } from './agent-instance';
 import { AgentRunObjectOptions, AgentRunOptions } from './agent-run-options';
@@ -111,6 +112,9 @@ export namespace AgentEventStream {
 
     /** The assistant's original response content */
     rawContent?: string;
+
+    /** Native Anthropic blocks, including signed thinking, for lossless continuation. */
+    anthropicContent?: AnthropicContentBlock[];
 
     /** Tool calls made by the assistant (if any) */
     toolCalls?: ChatCompletionMessageToolCall[];

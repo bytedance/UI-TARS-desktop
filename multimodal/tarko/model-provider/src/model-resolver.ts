@@ -58,16 +58,12 @@ export function resolveModel(
 ): AgentModel {
   // Start with runtime parameters, fall back to agent model configuration
   const provider = runProvider || agentModel?.provider || 'openai';
-  // The current Anthropic adapter cannot preserve Flash thinking responses.
-  // Keep its MiniMax default on M3 and select the matching wire protocol.
+  // Known MiniMax Anthropic endpoints need the native Anthropic wire protocol.
   const isMiniMaxAnthropic =
     (provider === 'minimax' || provider === 'anthropic') &&
     /^https:\/\/api\.(minimax\.io|minimaxi\.com)\/anthropic\/?$/.test(agentModel?.baseURL ?? '');
-  const defaultModel = isMiniMaxAnthropic
-    ? 'MiniMax-M3'
-    : provider === 'minimax'
-      ? 'MiniMax-M3.1-Flash'
-      : 'gpt-4o';
+  const defaultModel =
+    provider === 'minimax' || isMiniMaxAnthropic ? 'MiniMax-M3.1-Flash' : 'gpt-4o';
   const model = runModel || agentModel?.id || defaultModel;
 
   let baseURL = agentModel?.baseURL;

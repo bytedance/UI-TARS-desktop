@@ -183,6 +183,33 @@ describe('Stream Utils', () => {
       });
     });
 
+    it('preserves signed native blocks when reconstructing a completion', () => {
+      const blocks = [
+        { type: 'thinking', thinking: 'Reason', signature: 'opaque-signature' },
+        { type: 'text', text: 'Answer' },
+      ];
+      const chunks = [
+        {
+          id: 'native',
+          created: 0,
+          model: 'MiniMax-M3.1-Flash',
+          object: 'chat.completion.chunk',
+          choices: [
+            {
+              index: 0,
+              finish_reason: 'stop',
+              delta: { content: 'Answer', anthropic_content: blocks },
+            },
+          ],
+        },
+      ] as ChatCompletionChunk[];
+      const result = reconstructCompletion(chunks);
+      expect(result.choices[0].message).toMatchObject({
+        content: 'Answer',
+        anthropic_content: blocks,
+      });
+    });
+
     it('should correctly handle reasoning content', () => {
       const chunks: ChatCompletionChunk[] = [
         {

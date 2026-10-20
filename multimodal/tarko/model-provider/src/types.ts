@@ -8,6 +8,7 @@ import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/compl
 import type { models } from '@tarko/llm-client';
 
 export * from './third-party';
+export type { AnthropicContentBlock, AnthropicContinuation } from '@tarko/llm-client';
 
 /**
  * The base underlying model provider

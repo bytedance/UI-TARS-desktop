@@ -5,7 +5,7 @@
 
 import { TokenJS } from '@tarko/llm-client';
 import { OpenAI } from 'openai';
-import { LLMRequest, AgentModel } from './types';
+import { LLMRequest, AgentModel, AnthropicContinuation } from './types';
 import type { ChatCompletionCreateParamsBase } from './third-party';
 
 // Providers that should not be added to extended model list
@@ -76,6 +76,15 @@ export function createLLMClient(
 
           return client.chat.completions.create({
             ...finalRequest,
+            // Native signed blocks are only meaningful to the Anthropic adapter.
+            messages:
+              baseProvider === 'anthropic'
+                ? finalRequest.messages
+                : finalRequest.messages.map((message) => {
+                    const { anthropic_content, ...portableMessage } = message as typeof message &
+                      AnthropicContinuation;
+                    return portableMessage;
+                  }),
             provider: baseProvider || 'openai',
           });
         },

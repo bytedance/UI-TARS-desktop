@@ -7,6 +7,7 @@ import {
   ChatCompletionChunk,
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
+import type { AnthropicContinuation } from '@tarko/model-provider';
 
 /**
  * Reconstruct a ChatCompletion object from an array of chunks
@@ -30,6 +31,7 @@ export function reconstructCompletion(chunks: ChatCompletionChunk[]): ChatComple
   // Build the content by combining all chunks
   let content = '';
   let reasoningContent = '';
+  let anthropicContent: AnthropicContinuation['anthropic_content'];
   const toolCalls: ChatCompletionMessageToolCall[] = [];
 
   // Track tool calls by index
@@ -38,6 +40,7 @@ export function reconstructCompletion(chunks: ChatCompletionChunk[]): ChatComple
   // Process all chunks to reconstruct the complete response
   for (const chunk of chunks) {
     const delta = chunk.choices[0]?.delta;
+    anthropicContent = (delta as AnthropicContinuation)?.anthropic_content ?? anthropicContent;
 
     // Accumulate content
     if (delta?.content) {
@@ -94,6 +97,7 @@ export function reconstructCompletion(chunks: ChatCompletionChunk[]): ChatComple
           content,
           // @ts-expect-error Not in OpenAI types
           reasoning_content: reasoningContent || undefined,
+          ...(anthropicContent ? { anthropic_content: anthropicContent } : {}),
           tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
         },
         finish_reason: lastChunk.choices[0]?.finish_reason || 'stop',
