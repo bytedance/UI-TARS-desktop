@@ -56,7 +56,7 @@ const response = await client.chat.completions.create({
 
 ### MiniMax Configuration
 
-The `minimax` provider supports `MiniMax-M3` and `MiniMax-M2.7`. It defaults to the global OpenAI-compatible endpoint. Override `baseURL` when using the China endpoint or the Anthropic-compatible protocol:
+The recommended MiniMax models are `MiniMax-M3.1-Flash` and `MiniMax-M3`. The `minimax` provider uses `MiniMax-M3.1-Flash` when no model ID is supplied to `resolveModel`, and defaults to the global OpenAI-compatible endpoint. For either `minimax` or `anthropic` with a known MiniMax Anthropic endpoint below, the resolver selects the Anthropic protocol and defaults to `MiniMax-M3` instead, because the current adapter does not preserve Flash thinking responses. Explicit saved, legacy, custom, and runtime model IDs remain unchanged. Override `baseURL` when using the China endpoint or the Anthropic-compatible protocol:
 
 | Protocol             | Global                             | China                                |
 | -------------------- | ---------------------------------- | ------------------------------------ |
@@ -73,6 +73,10 @@ const model = resolveModel({
   apiKey: 'your-api-key',
 });
 ```
+
+Flash always uses adaptive thinking; the agent's generic reasoning switch does not disable it. For the `minimax` provider's OpenAI-compatible requests, set `params.reasoning_effort` to `low`, `medium`, `high`, `xhigh`, or `max` when needed (the API default is `max`). Do not send disabled thinking, `reasoning_effort: 'none'`, `service_tier`, or `reasoning_split: false` for Flash. Use the OpenAI-compatible route for Flash: the existing Anthropic response adapter does not yet preserve thinking blocks and can misinterpret them while streaming. The Anthropic example above uses M3, whose thinking is disabled by default; that adapter currently uses the API's default thinking and effort settings.
+
+See the [MiniMax OpenAI-compatible API](https://platform.minimax.io/docs/api-reference/text-openai-api) and [Anthropic-compatible API](https://platform.minimax.io/docs/api-reference/text-anthropic-api) for protocol details.
 
 ### Advanced Configuration
 
