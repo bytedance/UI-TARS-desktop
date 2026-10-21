@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../src/server.js';
@@ -98,6 +98,55 @@ describe('MCP Server in memory', () => {
           ],
         });
       });
+    });
+  });
+
+  describe('stdio protocol safety', () => {
+    test('tool calls must not write to stdout (stdout is the JSON-RPC channel for stdio transport)', async () => {
+      const tmpDir = await fs.mkdtemp(
+        path.join(os.tmpdir(), 'mcp-filesystem-stdout-'),
+      );
+      const client = new Client({
+        name: 'stdout test client',
+        version: '1.0',
+      });
+      const server = createServer({
+        allowedDirectories: [tmpDir],
+      });
+      const [clientTransport, serverTransport] =
+        InMemoryTransport.createLinkedPair();
+
+      await Promise.all([
+        client.connect(clientTransport),
+        server.connect(serverTransport),
+      ]);
+
+      // Spy on console.log directly (vitest intercepts it, so spying on
+      // process.stdout.write would miss it): any call here would go to
+      // process.stdout in production and corrupt the JSON-RPC stream of a
+      // stdio transport.
+      const consoleLogSpy = vi
+        .spyOn(console, 'log')
+        .mockImplementation(() => {});
+      try {
+        // An existing file exercises the realpath branch of validatePath.
+        const existingPath = path.join(tmpDir, 'existing.txt');
+        await fs.writeFile(existingPath, 'existing');
+        await client.callTool({
+          name: 'read_file',
+          arguments: { path: existingPath },
+        });
+        // A brand-new file exercises the parent-directory fallback branch.
+        await client.callTool({
+          name: 'write_file',
+          arguments: { path: path.join(tmpDir, 'new.txt'), content: 'new' },
+        });
+        expect(consoleLogSpy).not.toHaveBeenCalled();
+      } finally {
+        consoleLogSpy.mockRestore();
+        await client.close();
+        await fs.rm(tmpDir, { recursive: true, force: true });
+      }
     });
   });
 });
