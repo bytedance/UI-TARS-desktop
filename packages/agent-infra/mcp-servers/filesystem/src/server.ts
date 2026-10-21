@@ -62,14 +62,12 @@ function getAllowedDirectories() {
 
 // Security utilities
 async function validatePath(requestedPath: string): Promise<string> {
-  console.log('requestedPath', requestedPath);
   const expandedPath = expandHome(requestedPath);
   const absolute = path.isAbsolute(expandedPath)
     ? path.resolve(expandedPath)
     : path.resolve(process.cwd(), expandedPath);
 
   const normalizedRequested = normalizePath(absolute);
-  console.log('allowedDirectories', allowedDirectories);
 
   // Check if path is within allowed directories
   const isAllowed = allowedDirectories.some((dir) =>
@@ -98,7 +96,6 @@ async function validatePath(requestedPath: string): Promise<string> {
     console.error('[validatePath] error', error);
     // For new files that don't exist yet, verify parent directory
     const parentDir = path.dirname(absolute);
-    console.log('parentDir', parentDir);
     try {
       const realParentPath = await fs.realpath(parentDir);
       const normalizedParent = normalizePath(realParentPath);

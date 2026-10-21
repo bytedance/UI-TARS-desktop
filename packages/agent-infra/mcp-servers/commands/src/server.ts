@@ -141,7 +141,6 @@ async function runCommand(
 
   try {
     const result = await execAsync(command, options);
-    console.log('execute command result', result);
     return {
       isError: false,
       content: messagesFor(result),
