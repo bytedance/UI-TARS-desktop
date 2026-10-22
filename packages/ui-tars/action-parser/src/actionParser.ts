@@ -290,8 +290,9 @@ function parseAction(actionStr: string) {
     const kwargs = {};
 
     if (argsStr.trim()) {
-      // Split on commas that aren't inside quotes or parentheses
-      const argPairs = argsStr.match(/([^,']|'[^']*')+/g) || [];
+      // Split on commas outside quoted strings, respecting escaped quotes.
+      const argPairs =
+        argsStr.match(/([^,'"]|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")+/g) || [];
 
       for (const pair of argPairs) {
         const [key, ...valueParts] = pair.split('=');

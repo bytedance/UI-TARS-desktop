@@ -454,7 +454,7 @@ Action: click(start_box='[130,226]')`;
       expect(result).toEqual([
         {
           action_inputs: {
-            start_box: '[0.1]',
+            start_box: '[0.1,0.2,0.1,0.2]',
           },
           action_type: 'click',
           reflection: null,
