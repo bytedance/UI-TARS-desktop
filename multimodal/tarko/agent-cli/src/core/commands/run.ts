@@ -5,6 +5,7 @@
 
 import { LogLevel } from '@tarko/interface';
 import { AgentServer, resolveAgentImplementation } from '@tarko/agent-server';
+import { DEFAULT_SERVER_HOST } from '@tarko/shared-utils';
 import { ConsoleInterceptor } from '../../utils';
 import { AgentCLIRunCommandOptions } from '../../types';
 
@@ -73,9 +74,12 @@ export async function processServerRun(options: AgentCLIRunCommandOptions): Prom
 
   const { appConfig } = agentServerInitOptions;
 
+  // This server only exists to serve the one-shot request issued below, so keep it
+  // on loopback regardless of any configured host.
   appConfig.server = {
     ...(appConfig.server || {}),
     port: 8899,
+    host: DEFAULT_SERVER_HOST,
   };
 
   const { result, logs } = await ConsoleInterceptor.run(

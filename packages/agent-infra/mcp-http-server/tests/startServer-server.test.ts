@@ -148,7 +148,7 @@ describe('MCP Server HTTP Server Tests', () => {
       );
 
       const transport = new SSEClientTransport(
-        new URL(`http://localhost:${port}/sse`),
+        new URL(`http://127.0.0.1:${port}/sse`),
       );
 
       await client.connect(transport);
@@ -371,7 +371,7 @@ describe('MCP Server HTTP Server Tests', () => {
 
     it('should handle health check endpoint via custom middleware', async () => {
       const response = await fetch(
-        `http://localhost:${customMiddlewarePort}/health`,
+        `http://127.0.0.1:${customMiddlewarePort}/health`,
       );
 
       expect(response.status).toBe(200);
@@ -440,7 +440,7 @@ describe('MCP Server HTTP Server Tests', () => {
       });
 
       try {
-        const response = await fetch(`http://localhost:${middlewarePort}/mcp`, {
+        const response = await fetch(`http://127.0.0.1:${middlewarePort}/mcp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -530,7 +530,7 @@ describe('MCP Server HTTP Server Tests', () => {
 
       try {
         const response = await fetch(
-          `http://localhost:${statefulTestPort}/mcp`,
+          `http://127.0.0.1:${statefulTestPort}/mcp`,
           {
             method: 'POST',
             headers: {

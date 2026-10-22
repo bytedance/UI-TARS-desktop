@@ -259,7 +259,7 @@ export async function startSseAndStreamableHttpMcpServer(
     },
   );
 
-  const HOST = host || '::';
+  const HOST = host || '127.0.0.1';
   const PORT = Number(port || process.env.PORT || 8080);
 
   return new Promise((resolve, reject) => {

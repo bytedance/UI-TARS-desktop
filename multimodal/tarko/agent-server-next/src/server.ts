@@ -22,6 +22,7 @@ import { SandboxScheduler } from './services/sandbox';
 import { UserConfigService } from './services/user';
 import { MongoDAOFactory } from './dao/mongodb/MongoDAOFactory';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
+import { formatServerUrl, resolveServerHost } from '@tarko/shared-utils';
 import {
   createQueryRoutes,
   createSessionRoutes,
@@ -62,6 +63,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
   // Configuration
   public readonly port: number;
+  public readonly host: string;
   public readonly isDebug: boolean;
   public readonly isExclusive: boolean;
   public readonly daoFactory: IDAOFactory;
@@ -95,6 +97,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Extract server configuration from agent options
     this.port = appConfig.server?.port ?? 3000;
+    this.host = resolveServerHost(appConfig.server?.host);
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
     this.isExclusive = appConfig.server?.exclusive ?? false;
     this.tenantConfig = appConfig.server?.tenant || { mode: 'single', auth: false };
@@ -349,10 +352,11 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.server = serve({
       fetch: this.app.fetch,
       port: this.port,
+      hostname: this.host,
     });
 
     this.isRunning = true;
-    console.log(`Server started on port ${this.port}`);
+    console.log(`Server started on ${formatServerUrl(this.host, this.port)} (bound to ${this.host})`);
   }
 
   /**

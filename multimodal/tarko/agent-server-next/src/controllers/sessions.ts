@@ -7,6 +7,12 @@ import type { HonoContext } from '../types';
 import { getCurrentUserId } from '../middlewares/auth';
 import { SessionInfo } from '@tarko/interface';
 import { ShareService } from '../services';
+import { InvalidSessionInputError } from '../services/session/AgentSessionFactory';
+import {
+  ALLOWED_SESSION_AGENT_OPTION_KEYS,
+  filterDeclaredRuntimeSettings,
+  sanitizeSessionAgentOptions,
+} from '@tarko/shared-utils';
 import { filterSessionModel } from '../utils';
 
 /**
@@ -67,6 +73,9 @@ export async function createSession(c: HonoContext) {
       201,
     );
   } catch (error) {
+    if (error instanceof InvalidSessionInputError) {
+      return c.json({ error: error.message, ...error.details }, 400);
+    }
     console.error('Failed to create session:', error);
     return c.json({ error: 'Failed to create session' }, 500);
   }
@@ -200,10 +209,39 @@ export async function updateSession(c: HonoContext) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
+    // Session metadata is replayed into the Agent constructor on every session
+    // initialization, so hold its agent-facing fields to the same boundary as
+    // session creation instead of persisting the payload verbatim.
+    const sanitizedUpdates = { ...metadataUpdates };
+
+    if ('agentOptions' in sanitizedUpdates) {
+      const { value, rejectedKeys } = sanitizeSessionAgentOptions(sanitizedUpdates.agentOptions);
+      if (rejectedKeys.length > 0) {
+        return c.json(
+          {
+            error: 'Unsupported agentOptions',
+            message: `agentOptions may only contain ${ALLOWED_SESSION_AGENT_OPTION_KEYS.join(', ')}; rejected: ${rejectedKeys.join(', ')}. Configure anything else on the server.`,
+            allowed: ALLOWED_SESSION_AGENT_OPTION_KEYS,
+            rejected: rejectedKeys,
+          },
+          400,
+        );
+      }
+      sanitizedUpdates.agentOptions = value;
+    }
+
+    if ('runtimeSettings' in sanitizedUpdates) {
+      const { value } = filterDeclaredRuntimeSettings(
+        sanitizedUpdates.runtimeSettings,
+        server.appConfig?.server?.runtimeSettings?.schema,
+      );
+      sanitizedUpdates.runtimeSettings = value;
+    }
+
     const updatedMetadata = await server.daoFactory.updateSessionInfo(sessionId, {
       metadata: {
         ...sessionInfo.metadata,
-        ...metadataUpdates,
+        ...sanitizedUpdates,
       },
     });
 

@@ -120,8 +120,8 @@ npx @agent-infra/mcp-server-commands --port 8089
 ```
 
 You can use one of the two MCP Server remote endpoint:
-- Streamable HTTP(Recommended): `http://127.0.0.1::8089/mcp`
-- SSE: `http://127.0.0.1::8089/sse`
+- Streamable HTTP(Recommended): `http://127.0.0.1:8089/mcp`
+- SSE: `http://127.0.0.1:8089/sse`
 
 
 And then in MCP client config, set the `url` to the SSE endpoint:
@@ -130,7 +130,7 @@ And then in MCP client config, set the `url` to the SSE endpoint:
 {
   "mcpServers": {
     "commands": {
-      "url": "http://127.0.0.1::8089/sse"
+      "url": "http://127.0.0.1:8089/sse"
     }
   }
 }
@@ -143,7 +143,7 @@ And then in MCP client config, set the `url` to the SSE endpoint:
   "mcpServers": {
     "commands": {
       "type": "streamable-http", // If there is MCP Client support
-      "url": "http://127.0.0.1::8089/mcp"
+      "url": "http://127.0.0.1:8089/mcp"
     }
   }
 }

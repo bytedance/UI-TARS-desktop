@@ -40,7 +40,7 @@ await startSseAndStreamableHttpMcpServer({
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `port` | `number` | Port to listen on (default: 8080) |
-| `host` | `string` | Host to bind to (default: '::') |
+| `host` | `string` | Host to bind to (default: '127.0.0.1') |
 | `stateless` | `boolean` | Enable stateless mode for streamable HTTP (default: true) |
 | `middlewares` | `MiddlewareFunction[]` | Custom Express middlewares |
 | `routes` | `RoutesConfig` | Custom route configuration |

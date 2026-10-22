@@ -1,11 +1,12 @@
 {
   "private": true,
   "name": "@agent-tars/docs",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "scripts": {
     "build": "rspress build",
     "dev": "rspress dev",
-    "preview": "rspress preview"
+    "preview": "rspress preview",
+    "refresh:showcase-data": "node scripts/refresh-showcase-data.mjs"
   },
   "dependencies": {
     "@rspress/core": "2.0.0-beta.34",

@@ -107,8 +107,11 @@ tarko serve --port 8888 --config ./production.config.ts
 # Custom port (default: 3000)
 tarko serve --port 8888
 
-# Custom host (default: localhost)
+# Custom host (default: 127.0.0.1)
 tarko serve --host 0.0.0.0
+
+# Access token, required once the server is reachable from other machines
+tarko serve --host 0.0.0.0 --auth-token <token>
 
 # Debug mode
 tarko serve --debug
@@ -119,6 +122,18 @@ tarko serve --config ./server.config.yaml
 # Custom workspace
 tarko serve --workspace ./server-workspace
 ```
+
+### Remote access
+
+`tarko serve` binds `127.0.0.1` by default. Once it binds an address other machines can reach, such as `0.0.0.0`, every API request needs an access token, sent as `Authorization: Bearer <token>`. If none is set, a random token is generated and printed at startup. To keep the same token across restarts, set `TARKO_AUTH_TOKEN` or pass `--auth-token` (at least 16 characters).
+
+When clients reach the server through a hostname or browser origin other than `localhost` and `127.0.0.1`, for example behind a reverse proxy, allow them explicitly:
+
+| Environment variable | Description |
+| --- | --- |
+| `TARKO_AUTH_TOKEN` | Access token, same as `--auth-token` |
+| `TARKO_ALLOWED_HOSTS` | Comma-separated hostnames the server answers on, besides `localhost` and IP addresses on the server port. An entry without a port matches any port. Other hostnames get `403 Invalid Host header` |
+| `TARKO_ALLOWED_ORIGINS` | Comma-separated origins (`scheme://host[:port]`) allowed to call the API from a browser, besides `http://localhost:<port>` and `http://127.0.0.1:<port>` |
 
 ### API Endpoints
 

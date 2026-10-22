@@ -228,3 +228,69 @@ export const SecurityHeadersHook: HookRegistrationOptions = {
         c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     },
 };
+
+/**
+ * Build the set of Host header values that this server will answer on.
+ *
+ * The CORS Origin check alone does not protect against DNS rebinding: an
+ * attacker-controlled domain (e.g. `evil.example`) can be rebound to
+ * `127.0.0.1` after the initial page load, and same-origin GET fetches from
+ * the attacker's page will arrive at the local server **without an Origin
+ * header**, bypassing the Origin allowlist. Validating that the request's
+ * `Host` header is one we actually serve catches this — a DNS-rebound request
+ * carries `Host: evil.example:<port>`, not `localhost:<port>`.
+ *
+ * Operators that deliberately expose the server to other names (e.g. behind a
+ * reverse proxy or a custom hostname) can extend the allowlist via
+ * `TARKO_ALLOWED_HOSTS` (comma-separated).
+ */
+export function buildAllowedHosts(port: number): Set<string> {
+    const allowed = new Set<string>([
+        `localhost:${port}`,
+        `127.0.0.1:${port}`,
+        `[::1]:${port}`,
+        `[::ffff:127.0.0.1]:${port}`,
+    ]);
+    const extra = process.env.TARKO_ALLOWED_HOSTS;
+    if (extra) {
+        for (const h of extra.split(',')) {
+            const trimmed = h.trim();
+            if (trimmed) allowed.add(trimmed.toLowerCase());
+        }
+    }
+    return allowed;
+}
+
+/**
+ * Create a Host header validation hook — DNS rebinding defense.
+ *
+ * Must run before the CORS hook so attacker-controlled hostnames are rejected
+ * even when the Origin header is absent (e.g. a same-origin GET from a
+ * DNS-rebound iframe at `evil.example:<port>` sends no Origin header but
+ * does send `Host: evil.example:<port>`).
+ *
+ * @param port The server port to allow in Host headers
+ */
+export function createHostValidationHook(port: number): HookRegistrationOptions {
+    const allowedHosts = buildAllowedHosts(port);
+    return {
+        id: 'host-validation',
+        name: 'Host Validation',
+        priority: BuiltInPriorities.CORS + 20, // Before CORS and SecurityHeaders
+        description: 'Rejects requests whose Host header is not in the allowlist (DNS rebinding defense)',
+        handler: async (c, next) => {
+            const host = (c.req.header('Host') || '').toLowerCase();
+            if (!host || !allowedHosts.has(host)) {
+                return c.json(
+                    {
+                        error: 'Invalid Host header',
+                        message:
+                            'Request Host header does not match the server. Set TARKO_ALLOWED_HOSTS to allow additional hostnames.',
+                    },
+                    403,
+                );
+            }
+            await next();
+        },
+    };
+}
