@@ -275,7 +275,9 @@ UI-TARS Desktop is a native GUI agent for your local computer, driven by [UI-TAR
 
 ### Quick Start
 
-See [Quick Start](./docs/quick-start.md)
+[Download UI-TARS Desktop (Windows / macOS)](https://github.com/bytedance/UI-TARS-desktop/releases/tag/v0.2.4)
+
+See [Quick Start](./docs/quick-start.md) for model and operator setup.
 
 ## Contributing
 
