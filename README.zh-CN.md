@@ -272,7 +272,9 @@ UI-TARS Desktop 是一个由 [UI-TARS](https://github.com/bytedance/UI-TARS) 和
 
 ### Quick Start
 
-参见 [Quick Start](./docs/quick-start.md)
+[下载 UI-TARS Desktop 桌面应用（Windows / macOS）](https://github.com/bytedance/UI-TARS-desktop/releases/tag/v0.2.4)
+
+参见 [Quick Start](./docs/quick-start.md) 了解模型与操作器的配置说明。
 
 ## Contributing
 

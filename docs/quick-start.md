@@ -16,9 +16,11 @@ UI-TARS-desktop is currently only available for single monitor setup. Multi-moni
 
 ## Download
 
-You can download the [latest release](https://github.com/bytedance/UI-TARS-desktop/releases/latest) version of UI-TARS Desktop from our releases page.
+Desktop installers (Windows `.exe`, macOS `.dmg` / `.zip`) are published on the [UI-TARS Desktop v0.2.4 release](https://github.com/bytedance/UI-TARS-desktop/releases/tag/v0.2.4) page.
 
-> **Note**: If you have [Homebrew](https://brew.sh/) installed, you can install UI-TARS Desktop by running the following command:
+> **Note**: The newer `v0.3.x` releases ship the Agent TARS CLI and contain no desktop installer, so [the latest release](https://github.com/bytedance/UI-TARS-desktop/releases/latest) currently leads to a source-only page. Use the `v0.2.4` link above for the desktop app, or browse [all releases](https://github.com/bytedance/UI-TARS-desktop/releases).
+>
+> If you have [Homebrew](https://brew.sh/) installed, you can install UI-TARS Desktop by running the following command:
 > ```bash
 > brew install --cask ui-tars
 > ```
