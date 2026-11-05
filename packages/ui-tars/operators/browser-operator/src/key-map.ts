@@ -23,6 +23,18 @@ export const KEY_MAPPINGS: Record<string, KeyInput> = {
   arrowright: 'ArrowRight',
   backspace: 'Backspace',
   delete: 'Delete',
+  // Navigation / editing keys and aliases emitted by the model. These are
+  // already accepted by RemoteComputerOperator and NutJSOperator.
+  pageup: 'PageUp',
+  pagedown: 'PageDown',
+  home: 'Home',
+  end: 'End',
+  insert: 'Insert',
+  space: 'Space',
+  spacebar: 'Space',
+  esc: 'Escape',
+  return: 'Enter',
+  del: 'Delete',
   f1: 'F1',
   f2: 'F2',
   f3: 'F3',
@@ -117,3 +129,20 @@ export const KEY_MAPPINGS: Record<string, KeyInput> = {
   '`': '`',
   ' ': ' ',
 };
+
+/**
+ * Resolve a model-provided key expression (e.g. `ctrl+pagedown`) into the
+ * Puppeteer key inputs used by the browser operator. Shared by the hotkey,
+ * press and release handlers so all three accept the same set of aliases.
+ */
+export function normalizeKeys(keyStr: string): KeyInput[] {
+  return keyStr.split(/[\s+]/).map((key) => {
+    const keyInput = KEY_MAPPINGS[key.toLowerCase()];
+
+    if (keyInput) {
+      return keyInput;
+    }
+
+    throw new Error(`Unsupported key: ${key}`);
+  });
+}
