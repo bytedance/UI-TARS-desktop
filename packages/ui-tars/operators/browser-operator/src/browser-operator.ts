@@ -8,7 +8,6 @@ import { ConsoleLogger, Logger, defaultLogger } from '@agent-infra/logger';
 import { Operator, parseBoxToScreenCoords } from '@ui-tars/sdk/core';
 import {
   Page,
-  KeyInput,
   BrowserType,
   BrowserInterface,
   RemoteBrowser,
@@ -22,7 +21,7 @@ import { BrowserOperatorOptions, SearchEngine } from './types';
 import { UIHelper } from './ui-helper';
 import { BrowserFinder } from '@agent-infra/browser';
 
-import { KEY_MAPPINGS } from './key-map';
+import { normalizeKeys } from './key-map';
 import { shortcuts } from './shortcuts';
 
 /**
@@ -420,17 +419,7 @@ export class BrowserOperator extends Operator {
 
     this.logger.info(`Executing hotkey: ${keyStr}`);
 
-    const keys = keyStr.split(/[\s+]/);
-    const normalizedKeys: KeyInput[] = keys.map((key: string) => {
-      const lowercaseKey = key.toLowerCase();
-      const keyInput = KEY_MAPPINGS[lowercaseKey];
-
-      if (keyInput) {
-        return keyInput;
-      }
-
-      throw new Error(`Unsupported key: ${key}`);
-    });
+    const normalizedKeys = normalizeKeys(keyStr);
 
     this.logger.info(`Normalized keys:`, normalizedKeys);
 
@@ -460,17 +449,7 @@ export class BrowserOperator extends Operator {
 
     this.logger.info(`Pressing key: ${keyStr}`);
 
-    const keys = keyStr.split(/[\s+]/);
-    const normalizedKeys: KeyInput[] = keys.map((key: string) => {
-      const lowercaseKey = key.toLowerCase();
-      const keyInput = KEY_MAPPINGS[lowercaseKey];
-
-      if (keyInput) {
-        return keyInput;
-      }
-
-      throw new Error(`Unsupported key: ${key}`);
-    });
+    const normalizedKeys = normalizeKeys(keyStr);
 
     this.logger.info(`Normalized keys for press:`, normalizedKeys);
 
@@ -494,17 +473,7 @@ export class BrowserOperator extends Operator {
 
     this.logger.info(`Releasing key: ${keyStr}`);
 
-    const keys = keyStr.split(/[\s+]/);
-    const normalizedKeys: KeyInput[] = keys.map((key: string) => {
-      const lowercaseKey = key.toLowerCase();
-      const keyInput = KEY_MAPPINGS[lowercaseKey];
-
-      if (keyInput) {
-        return keyInput;
-      }
-
-      throw new Error(`Unsupported key: ${key}`);
-    });
+    const normalizedKeys = normalizeKeys(keyStr);
 
     this.logger.info(`Normalized keys for release:`, normalizedKeys);
 
