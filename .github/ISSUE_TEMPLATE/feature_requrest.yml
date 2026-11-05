@@ -12,15 +12,16 @@ body:
          - Make sure you've searched in the [Issues](https://github.com/bytedance/UI-TARS-desktop/issues) and haven't found the same request.
          - You can discuss the feature in the [Discussions](https://github.com/bytedance/UI-TARS-desktop/discussions) first.
 
-  - type: checkboxes
+  - type: dropdown
     id: project
     attributes:
-      label: Which destkop app does this feature request relate to?
+      label: Which desktop app does this feature request relate to?
       description: Select the related project for this feature request.
       options:
-        - label: Select a project 👇
-        - label: Agent-TARS (cli, server, agent, tool etc.)
-        - label: UI-TARS Desktop
+        - Agent-TARS (cli, server, agent, tool etc.)
+        - UI-TARS Desktop
+    validations:
+      required: true
 
   - type: textarea
     id: description
