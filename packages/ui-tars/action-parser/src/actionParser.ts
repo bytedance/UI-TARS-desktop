@@ -269,13 +269,6 @@ function parseAction(actionStr: string) {
     // Support format: click(start_box='<|box_start|>(x1,y1)<|box_end|>')
     actionStr = actionStr.replace(/<\|box_start\|>|<\|box_end\|>/g, '');
 
-    // Support format: click(point='<point>510 150</point>') => click(start_box='<point>510 150</point>')
-    // Support format: drag(start_point='<point>458 328</point>', end_point='<point>350 309</point>') => drag(start_box='<point>458 328</point>', end_box='<point>350 309</point>')
-    actionStr = actionStr
-      .replace(/(?<!start_|end_)point=/g, 'start_box=')
-      .replace(/start_point=/g, 'start_box=')
-      .replace(/end_point=/g, 'end_box=');
-
     // Match function name and arguments using regex
     const functionPattern = /^(\w+)\((.*)\)$/;
     const match = actionStr.trim().match(functionPattern);
@@ -296,6 +289,10 @@ function parseAction(actionStr: string) {
       for (const pair of argPairs) {
         const [key, ...valueParts] = pair.split('=');
         if (!key) continue;
+        const paramName = key
+          .trim()
+          .replace(/^(?:start_)?point$/, 'start_box')
+          .replace(/^end_point$/, 'end_box');
 
         let value = valueParts
           .join('=')
@@ -315,7 +312,7 @@ function parseAction(actionStr: string) {
         }
 
         //@ts-ignore
-        kwargs[key.trim()] = value;
+        kwargs[paramName] = value;
       }
     }
 
