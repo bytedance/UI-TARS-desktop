@@ -65,6 +65,15 @@ Action: type(text='Hello', start_box='(300,400)')`;
       ]);
     });
 
+    it('preserves coordinate alias names inside typed text', () => {
+      const content =
+        'checkpoint=ready point=literal start_point=literal end_point=literal';
+      const [result] = parseActionVlm(`Action: type(content='${content}')`);
+
+      expect(result.action_type).toBe('type');
+      expect(result.action_inputs).toEqual({ content });
+    });
+
     it('should handle multiple actions', () => {
       const input = `Thought: Perform multiple actions
 Action: click(start_box='(100,200)')
